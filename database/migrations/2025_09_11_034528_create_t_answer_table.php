@@ -21,8 +21,9 @@ return new class extends Migration
             ->constrained('m_question')
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
-            $table->text('text_value');
+            $table->text('text_value')->nullable();
             $table->foreignUuid('m_question_option_id')
+            ->nullable()
             ->constrained('m_question_option')
             ->cascadeOnUpdate()
             ->cascadeOnDelete();

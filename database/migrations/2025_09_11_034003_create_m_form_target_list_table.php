@@ -18,10 +18,12 @@ return new class extends Migration
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
             $table->string('target_type', 32);
-            $table->uuid('target_id');
-            $table->uuid('relation_id');
+            $table->uuid('target_id')->nullable();
+            $table->uuid('relation_id')->nullable();
             $table->string('target_label', 256);
             $table->timestamps();
+
+              $table->unique(['m_form_target_rule_id', 'target_type', 'target_id', 'relation_id'], 'form_target_list_unique_constraint');
         });
     }
 
