@@ -6,23 +6,15 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+    // Middleware supaya halaman dashboard hanya bisa diakses kalau user punya JWT
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware('jwt.verify');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
+    // Fungsi utama untuk menampilkan dashboard
     public function index()
     {
-        return view('content.dashboard.dashboards-analytics');
+        return view('content.dashboard.dashboard-main');
     }
 }

@@ -1,4 +1,6 @@
 import './bootstrap';
+import '../css/login.css';
+
 /*
   Add custom scripts here
 */
