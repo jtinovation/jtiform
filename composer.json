@@ -12,9 +12,11 @@
     "laravel/framework": "^12.0",
     "laravel/tinker": "^2.9",
     "laravel/ui": "^4.6",
+    "php-flasher/flasher-toastr-laravel": "^2.1",
     "predis/predis": "^3.0",
     "spatie/laravel-google-cloud-storage": "^2.3",
     "tuncaybahadir/quar": "^1.4",
+    "tymon/jwt-auth": "^2.2",
     "yoeunes/toastr": "^3.1"
   },
   "require-dev": {

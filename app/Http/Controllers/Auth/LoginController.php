@@ -3,43 +3,46 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
 
-    use AuthenticatesUsers;
-
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function showLoginForm()
     {
-        $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
+        return view('auth.login');
     }
 
-  public function showLoginForm()
-  {
-    return view('content.authentications.auth-login-basic');
-  }
+
+    public function login(Request $request)
+    {
+       $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+        $credentials = $request->only('email', 'password');
+
+        try {
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return back()->withErrors(['login_error' => 'Email atau password salah']);
+            }
+        } catch (JWTException $e) {
+            return back()->withErrors(['login_error' => 'Gagal membuat token']);
+        }
+
+
+        return redirect('/dashboard')->withCookie(cookie('jwt_token', $token, 60, null, null, false, true));
+    }
+
+
+    public function logout()
+    {
+        $cookie = cookie()->forget('jwt_token');
+        return redirect('/login')->withCookie($cookie);
+    }
+
+
 }
