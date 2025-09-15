@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('m_form', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('code')->unique();
-            $table->string('cover_path');
-            $table->string('cover_file');
+            $table->string('code');
+            $table->string('cover_path')->nullable();
+            $table->string('cover_file')->nullable();
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->boolean('is_active');
             $table->dateTime('start_at');
             $table->dateTime('end_at');
