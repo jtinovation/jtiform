@@ -18,6 +18,7 @@ class FormFactory extends Factory
     {
         return [
           'code' => fake()->unique()->bothify('??##??##'),
+          'form_type' => fake()->randomElement(['questionnaire', 'survey']),
           'cover_path' => 'images/covers',
           'cover_file' => fake()->numerify('cover-#####.jpg'),
           'title' => fake()->sentence(5),
