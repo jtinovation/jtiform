@@ -17,9 +17,4 @@ class HomeController extends Controller
     {
         return view('content.dashboard.dashboard-main');
     }
-
-    public function showForm()
-    {
-      return view('content.form.form');
-    }
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\FormController;
 use App\Http\Controllers\HomeController;
 
 Route::get('/', function () {
@@ -19,4 +20,8 @@ Route::get('/dashboard', [HomeController::class, 'index']);
 
 
 // 🔹 Dashboard route
-Route::get('/form', [HomeController::class, 'showForm']);
+Route::get('/form', [FormController::class, 'showActiveForm']);
+Route::get('/form/form-master', [FormController::class, 'showForm']);
+
+// 🔹 Debugging purpose
+Route::get('/table', [FormController::class, 'checkTable']);
