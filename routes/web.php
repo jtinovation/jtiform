@@ -14,4 +14,9 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // 🔹 Protected route → hanya bisa diakses setelah login
-Route::get('/dashboard', [HomeController::class, 'index'])->middleware('jwt.verify');
+Route::get('/dashboard', [HomeController::class, 'index']);
+// Route::get('/dashboard', [HomeController::class, 'index'])->middleware('jwt.verify');
+
+
+// 🔹 Dashboard route
+Route::get('/form', [HomeController::class, 'showForm']);
