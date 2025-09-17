@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class FormController extends Controller
 {
@@ -11,13 +12,13 @@ class FormController extends Controller
     public function listForm()
     {
         $forms = Form::all();
-        return view('form.list', compact('forms'));
+        return view('content.form-layout.ListForm', compact('forms'));
     }
 
     // 🔹 Tampilkan halaman tambah form
     public function tambahForm()
     {
-        return view('form.tambah');
+        return view('content.form-layout.TambahForm');
     }
 
     // 🔹 Simpan form baru
@@ -25,19 +26,23 @@ class FormController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'is_active' => 'nullable|boolean',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date',
         ]);
 
+        // simpan form
         Form::create($request->all());
 
-        return redirect()->route('form.list')
-                         ->with('success', 'Form berhasil dibuat.');
+        // redirect ke halaman daftar form aktif
+        return redirect('/form')->with('success', 'Form berhasil dibuat.');
     }
 
     // 🔹 Edit form
     public function editForm(Form $form)
     {
-        return view('form.edit', compact('form'));
+        return view('content.form-layout.EditForm', compact('form'));
     }
 
     // 🔹 Update form
@@ -45,13 +50,15 @@ class FormController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'is_active' => 'nullable|boolean',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date',
         ]);
 
         $form->update($request->all());
 
-        return redirect()->route('form.list')
-                         ->with('success', 'Form berhasil diperbarui.');
+        return redirect('/form')->with('success', 'Form berhasil diperbarui.');
     }
 
     // 🔹 Hapus form
@@ -59,34 +66,44 @@ class FormController extends Controller
     {
         $form->delete();
 
-        return redirect()->route('form.list')
-                         ->with('success', 'Form berhasil dihapus.');
+        return redirect('/form')->with('success', 'Form berhasil dihapus.');
     }
-    
-      public function showActiveForm()
+
+    // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
+    public function showActiveForm()
     {
-      $forms = Form::where('is_active', 1)->get();
+        $now = Carbon::now();
 
-      return view('content.form.form-active', compact('forms'));
+        $forms = Form::where(function ($q) use ($now) {
+                        $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
+                    })
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+                    })
+                    ->get();
+
+        return view('content.form.form-active', compact('forms'));
     }
 
+    // 🔹 Tampilkan semua form
     public function showForm()
     {
-      $forms = Form::get();
-
-      return view('content.form.form-master', compact('forms'));
+        $forms = Form::get();
+        return view('content.form.form-master', compact('forms'));
     }
 
-
+    // 🔹 Tampilkan pertanyaan berdasarkan form
     public function showQuestionList($id)
     {
-      $questions = Question::where('m_form_id', $id)->orderBy('sequence', 'asc')->get();
+        $questions = Question::where('m_form_id', $id)
+                             ->orderBy('sequence', 'asc')
+                             ->get();
 
-      return view('content.form.questions', compact('questions'));
+        return view('content.form.questions', compact('questions'));
     }
 
     public function checkTable()
     {
-      return view('content.user-interface.ui-buttons');
+        return view('content.user-interface.ui-buttons');
     }
 }
