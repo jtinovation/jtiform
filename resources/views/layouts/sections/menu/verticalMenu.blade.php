@@ -4,7 +4,7 @@
   <div class="app-brand demo">
     <a href="{{url('/')}}" class="app-brand-link">
       <span class="app-brand-logo demo me-1">
-        @include('_partials.macros',["height"=>20])
+        <img src="{{ asset('img/brand/logo-jti.png') }}" alt="Logo" height="40">
       </span>
       <span class="app-brand-text demo menu-text fw-semibold ms-2">{{config('variables.templateName')}}</span>
     </a>
