@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
+use App\Models\Question;
 use Illuminate\Http\Request;
 
 class FormController extends Controller
@@ -21,6 +22,13 @@ class FormController extends Controller
       return view('content.form.form-master', compact('forms'));
     }
 
+
+    public function showQuestionList($id)
+    {
+      $questions = Question::where('m_form_id', $id)->orderBy('sequence', 'asc')->get();
+
+      return view('content.form.questions', compact('questions'));
+    }
 
     public function checkTable()
     {

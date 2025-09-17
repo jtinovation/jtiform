@@ -22,6 +22,7 @@ Route::get('/dashboard', [HomeController::class, 'index']);
 // 🔹 Dashboard route
 Route::get('/form', [FormController::class, 'showActiveForm']);
 Route::get('/form/form-master', [FormController::class, 'showForm']);
+Route::get('/form/{id}/questions', [FormController::class, 'showQuestionList'])->name('form.questions');
 
 // 🔹 Debugging purpose
 Route::get('/table', [FormController::class, 'checkTable']);

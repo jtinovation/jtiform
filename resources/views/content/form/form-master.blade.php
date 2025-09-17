@@ -18,7 +18,7 @@
           <th>Kode Form</th>
           <th>Tipe Form</th>
           <th>Judul Form</th>
-          <th>Actions</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody class="table-border-bottom-0">
@@ -34,7 +34,7 @@
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="javascript:void(0);"><i class="ri-pencil-line me-1"></i> Edit Form</a>
                 <a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-6-line me-1"></i> Delete</a>
-                <a class="dropdown-item" href="javascript:void(0);"><i class="ri-questionnaire-line me-1"></i> List Pertanyaan</a>
+                <a class="dropdown-item" href=" {{route('form.questions', ['id' => $form->id])}} "><i class="ri-questionnaire-line me-1"></i> List Pertanyaan</a>
               </div>
             </div>
           </td>
@@ -43,7 +43,7 @@
         @empty
         <tr>
             <td colspan="4" class="text-center py-4">
-                <p class="mb-0">Tidak ada form aktif</p>
+                <p class="mb-0">Tidak ada form</p>
             </td>
         </tr>
         @endforelse
