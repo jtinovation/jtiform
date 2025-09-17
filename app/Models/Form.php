@@ -14,6 +14,7 @@ class Form extends Model
   protected $table = 'm_form';
   protected $fillable = [
     'code',
+    'form_type',
     'cover_path',
     'cover_file',
     'title',
