@@ -23,4 +23,19 @@ class Form extends Model
     'start_at',
     'end_at',
   ];
+  protected $casts = [
+        'start_at' => 'datetime',
+        'end_at'   => 'datetime',
+    ];
+
+    /**
+     * 🔹 Accessor: hitung status aktif berdasarkan tanggal
+     */
+    public function getIsCurrentlyActiveAttribute()
+    {
+        $now = Carbon::now();
+        return $this->start_at && $this->end_at
+            ? $now->between($this->start_at, $this->end_at)
+            : false;
+    }
 }
