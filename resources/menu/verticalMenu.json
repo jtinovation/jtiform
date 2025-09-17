@@ -293,7 +293,7 @@
       "submenu": [
         {
           "url": "form/form-master",
-          "name": "Vertical Form",
+          "name": "Form",
           "slug": "form-layouts-vertical"
         }
       ]
