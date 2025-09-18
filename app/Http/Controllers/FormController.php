@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use App\Models\Question;
+use App\Models\Question;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class FormController extends Controller
 {
-
-
-  // 🔹 Tampilkan halaman tambah form
-   public function tambahForm()
+    // 🔹 Tampilkan halaman tambah form
+    public function tambahForm()
     {
         return view('content.form-layout.TambahForm');
     }
@@ -49,7 +48,7 @@ class FormController extends Controller
         $startAt = Carbon::parse($request->start_at);
         $endAt   = Carbon::parse($request->end_at);
 
-       
+
         if ($startAt->lt($now->copy()->startOfDay())) {
             return back()->withErrors(['start_at' => 'Start date cannot be before today.'])->withInput();
         }
@@ -162,31 +161,71 @@ public function hapusForm($id)
     }
 }
 
-  // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
-  public function showActiveForm()
-    {
+    // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
+    public function showActiveForm(Request $request)
+      {
+            $search = $request->query('search-input');
+
         $now = Carbon::now();
 
-        $forms = Form::whereDate('start_at', '<=', $now->toDateString())
-                     ->whereDate('end_at', '>=', $now->toDateString())
-                     ->get();
+        $query = Form::query();
+
+        $query->where('is_active', true);
+
+        $query->where(function ($q) use ($now) {
+            $q->whereNull('start_at')->orWhereDate('start_at', '<=', $now->toDateString());
+        })
+        ->where(function ($q) use ($now) {
+            $q->whereNull('end_at')->orWhereDate('end_at', '>=', $now->toDateString());
+        });
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('form_type', 'like', "%{$search}%");
+            });
+        }
+
+        $forms = $query->latest('end_at')->paginate(10)->withQueryString();
 
         return view('content.form.form-active', compact('forms'));
     }
 
-  // 🔹 Tampilkan semua form
-  public function showForm()
-  {
-    $forms = Form::get();
-    return view('content.form.form-master', compact('forms'));
-  }
+    // 🔹 Tampilkan semua form
+    public function showForm(Request $request)
+    {
+        $search = $request->query('search-input');
 
-  // 🔹 Tampilkan pertanyaan berdasarkan form
-  public function showQuestionList($id)
-  {
-    $questions = Question::where('m_form_id', $id)
-      ->orderBy('sequence', 'asc')
-      ->get();
+        $forms = Form::query();
+
+        if ($search) {
+            $forms->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('form_type', 'like', "%{$search}%");
+            });
+        }
+
+        $forms = $forms->paginate(10)->withQueryString();
+
+        return view('content.form.form-master', compact('forms'));
+    }
+
+    // 🔹 Tampilkan pertanyaan berdasarkan form
+    public function showQuestionList(Request $request, $id)
+    {
+        $search = $request->query('search-input');
+
+        $questions = Question::where('m_form_id', $id)
+                             ->orderBy('sequence', 'asc');
+
+        if ($search) {
+            $questions->where(function ($q) use ($search) {
+                $q->where('question', 'like', "%{$search}%")
+                  ->orWhere('type', 'like', "%{$search}%");
+            });
+        }
+
+        $questions = $questions->paginate(10)->withQueryString();
 
     return view('content.form.questions', compact('questions'));
   }

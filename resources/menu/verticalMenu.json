@@ -10,7 +10,7 @@
       "menuHeader": "Forms & Tables"
     },
     {
-      "url": "/form",
+      "url": "/form-active",
       "name": "Form",
       "icon": "menu-icon tf-icons ri-radio-button-line",
       "slug": "forms"
@@ -21,7 +21,7 @@
       "slug": "form-layouts",
       "submenu": [
         {
-          "url": "form/form-master",
+          "url": "/form",
           "name": "Form",
           "slug": "form-layouts-vertical"
         }

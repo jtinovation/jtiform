@@ -4,8 +4,17 @@
 
 @section('content')
 <div class="card">
-  <h5 class="card-header">Data Form Aktif</h5>
-  <div class="table-responsive text-nowrap">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Data Form Aktif</h5>
+    <form class="d-flex">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="tf-icons ri-search-line"></i></span>
+        <input type="text" class="form-control search-input" name="search-input" data-target="#form-active-table" placeholder="Search..." />
+      </div>
+    </form>
+  </div>
+
+  <div id="form-active-table" class="table-responsive text-nowrap">
     <table class="table table-hover">
       <thead>
         <tr>
@@ -27,25 +36,7 @@
             <div class="dropdown">
               <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
               <div class="dropdown-menu">
-
-               <!-- Edit Form -->
-               <a class="dropdown-item" href="{{ route('form.edit', $form->id) }}">
-               <i class="ri-pencil-line me-1"></i> Edit Form</a>
-
-                <!-- Ganti dengan form langsung -->
-              <form action="{{ route('form.hapus', $form->id) }}"
-                    method="POST"
-                    style="display: inline;"
-                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus form ini?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
-                  <i class="ri-delete-bin-6-line me-1"></i> Delete
-                </button>
-              </form>
-
-
-                <a class="dropdown-item" href=" {{route('form.questions', ['id' => $form->id])}}" ><i class="ri-questionnaire-line me-1"></i> List Pertanyaan</a>
+                <a class="dropdown-item" href="javascript:void(0);"><i class="ri-pencil-line me-1"></i> Mengerjakan Form</a>
               </div>
             </div>
           </td>
@@ -64,4 +55,10 @@
   </div>
 </div>
 
+
+@endsection
+
+@section('page-script')
+  <script src="{{ asset('vendor/flasher/jquery.min.js') }}"></script>
+  @vite(['resources/assets/js/form-search.js'])
 @endsection

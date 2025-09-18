@@ -18,7 +18,7 @@ class FormTargetRuleFactory extends Factory
     public function definition(): array
     {
         return [
-            'm_form_id' => Form::factory(),
+            'm_form_id' => Form::pluck('id')->random(),
             'mode' => 'MANUAL_LIST',
             'target_type' => fake()->name(),
             'filter_json' => json_encode([]),

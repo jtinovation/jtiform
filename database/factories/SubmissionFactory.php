@@ -26,7 +26,7 @@ class SubmissionFactory extends Factory
         $isAnonymous = fake()->boolean();
 
         return [
-            'm_form_id' => Form::factory(),
+            'm_form_id' => Form::pluck('id')->random(),
             'm_user_id' =>  $isAnonymous ? null : fake()->uuid(),
             'started_at' => $startTime,
             'submitted_at' => $endTime,

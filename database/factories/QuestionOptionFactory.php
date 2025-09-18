@@ -18,7 +18,7 @@ class QuestionOptionFactory extends Factory
     public function definition(): array
     {
         return [
-            'm_question_id' => Question::factory(),
+            'm_question_id' => Question::pluck('id')->random(),
             'answer' => fake()->text(),
             'sequence' => fake()->randomNumber(1, 10),
             'point' => fake()->numberBetween(0, 100)
