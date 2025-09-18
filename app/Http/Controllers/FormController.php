@@ -196,16 +196,16 @@ public function hapusForm($id)
     {
         $search = $request->query('search-input');
 
-        $forms = Form::query();
+        $query = Form::query();
 
         if ($search) {
-            $forms->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('form_type', 'like', "%{$search}%");
             });
         }
 
-        $forms = $forms->paginate(10)->withQueryString();
+        $forms = $query->paginate(10)->withQueryString();
 
         return view('content.form.form-master', compact('forms'));
     }
@@ -215,23 +215,25 @@ public function hapusForm($id)
     {
         $search = $request->query('search-input');
 
-        $questions = Question::where('m_form_id', $id)
-                             ->orderBy('sequence', 'asc');
+        $query = Question::query();
+
+        $query->where('m_form_id', $id)
+              ->orderBy('sequence', 'asc');
 
         if ($search) {
-            $questions->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('question', 'like', "%{$search}%")
                   ->orWhere('type', 'like', "%{$search}%");
             });
         }
 
-        $questions = $questions->paginate(10)->withQueryString();
+        $questions = $query->paginate(10)->withQueryString();
 
     return view('content.form.questions', compact('questions'));
   }
 
-  public function checkTable()
-  {
-    return view('content.user-interface.ui-buttons');
-  }
+    public function checkFile()
+    {
+        return view('content.user-interface.ui-pagination-breadcrumbs');
+    }
 }

@@ -40,4 +40,4 @@ Route::get('/form', [FormController::class, 'showForm']);
 Route::get('/form/{id}/questions', [FormController::class, 'showQuestionList'])->name('form.questions');
 
 // 🔹 Debugging purpose
-Route::get('/table', [FormController::class, 'checkTable']);
+Route::get('/check', [FormController::class, 'checkFile']);
