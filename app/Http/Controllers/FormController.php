@@ -8,102 +8,108 @@ use Carbon\Carbon;
 
 class FormController extends Controller
 {
-    // 🔹 Tampilkan daftar form
-    public function listForm()
-    {
-        $forms = Form::all();
-        return view('content.form-layout.ListForm', compact('forms'));
-    }
+  // 🔹 Tampilkan daftar form
+  public function listForm()
+  {
+    $forms = Form::all();
+    return view('content.form-layout.ListForm', compact('forms'));
+  }
 
-    // 🔹 Tampilkan halaman tambah form
-    public function tambahForm()
-    {
-        return view('content.form-layout.TambahForm');
-    }
+  // 🔹 Tampilkan halaman tambah form
+  public function tambahForm()
+  {
+    return view('content.form-layout.TambahForm');
+  }
 
-    // 🔹 Simpan form baru
-    public function simpanForm(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
-            'start_at' => 'nullable|date',
-            'end_at' => 'nullable|date',
-        ]);
+  // 🔹 Simpan form baru
+  public function simpanForm(Request $request)
+  {
+    $request->validate([
+      'title' => 'required|string|max:255',
+      'description' => 'nullable|string',
+      'is_active' => 'nullable|boolean',
+      'start_at' => 'nullable|date',
+      'end_at' => 'nullable|date|after_or_equal:start_at',
+    ]);
 
-        // simpan form
-        Form::create($request->all());
+    // simpan form
+    Form::create([
+      'title' => $request->title,
+      'description' => $request->description,
+      'is_active' => $request->is_active ?? false,
+      'start_at' => $request->start_at,
+      'end_at' => $request->end_at,
+    ]);
 
-        // redirect ke halaman daftar form aktif
-        return redirect('/form')->with('success', 'Form berhasil dibuat.');
-    }
+    // redirect ke halaman daftar form aktif
+    return redirect('/form')->with('success', 'Form berhasil dibuat.');
+  }
 
-    // 🔹 Edit form
-    public function editForm(Form $form)
-    {
-        return view('content.form-layout.EditForm', compact('form'));
-    }
+  // 🔹 Edit form
+  public function editForm(Form $form)
+  {
+    return view('content.form-layout.EditForm', compact('form'));
+  }
 
-    // 🔹 Update form
-    public function updateForm(Request $request, Form $form)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
-            'start_at' => 'nullable|date',
-            'end_at' => 'nullable|date',
-        ]);
+  // 🔹 Update form
+  public function updateForm(Request $request, Form $form)
+  {
+    $request->validate([
+      'title' => 'required|string|max:255',
+      'description' => 'nullable|string',
+      'is_active' => 'nullable|boolean',
+      'start_at' => 'nullable|date',
+      'end_at' => 'nullable|date',
+    ]);
 
-        $form->update($request->all());
+    $form->update($request->all());
 
-        return redirect('/form')->with('success', 'Form berhasil diperbarui.');
-    }
+    return redirect('/form')->with('success', 'Form berhasil diperbarui.');
+  }
 
-    // 🔹 Hapus form
-    public function hapusForm(Form $form)
-    {
-        $form->delete();
+  // 🔹 Hapus form
+  public function hapusForm(Form $form)
+  {
+    $form->delete();
 
-        return redirect('/form')->with('success', 'Form berhasil dihapus.');
-    }
+    return redirect('/form')->with('success', 'Form berhasil dihapus.');
+  }
 
-    // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
-    public function showActiveForm()
-    {
-        $now = Carbon::now();
+  // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
+  public function showActiveForm()
+  {
+    $now = Carbon::now();
 
-        $forms = Form::where(function ($q) use ($now) {
-                        $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
-                    })
-                    ->where(function ($q) use ($now) {
-                        $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
-                    })
-                    ->get();
+    $forms = Form::where(function ($q) use ($now) {
+      $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
+    })
+      ->where(function ($q) use ($now) {
+        $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+      })
+      ->get();
 
-        return view('content.form.form-active', compact('forms'));
-    }
+    return view('content.form.form-active', compact('forms'));
+  }
 
-    // 🔹 Tampilkan semua form
-    public function showForm()
-    {
-        $forms = Form::get();
-        return view('content.form.form-master', compact('forms'));
-    }
+  // 🔹 Tampilkan semua form
+  public function showForm()
+  {
+    $forms = Form::get();
+    return view('content.form.form-master', compact('forms'));
+  }
 
-    // 🔹 Tampilkan pertanyaan berdasarkan form
-    public function showQuestionList($id)
-    {
-        $questions = Question::where('m_form_id', $id)
-                             ->orderBy('sequence', 'asc')
-                             ->get();
+  // 🔹 Tampilkan pertanyaan berdasarkan form
+  public function showQuestionList($id)
+  {
+    $questions = Question::where('m_form_id', $id)
+      ->orderBy('sequence', 'asc')
+      ->get();
 
-        return view('content.form.questions', compact('questions'));
-    }
+    return view('content.form.questions', compact('questions'));
+  }
 
-    public function checkTable()
-    {
-        return view('content.user-interface.ui-buttons');
-    }
+  public function checkTable()
+  {
+    return view('content.user-interface.ui-buttons');
+  }
 }

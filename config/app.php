@@ -124,4 +124,5 @@ return [
   ],
 
   'storage_url' => env('APP_URL') . '/storage',
+  'super_app_url' => env('SUPER_APP_URL', 'http://jti-super-app-go.test')
 ];
