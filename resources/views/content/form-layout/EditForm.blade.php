@@ -1,17 +1,18 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Add Form - Horizontal Layout')
+@section('title', 'Edit Form - Horizontal Layout')
 
 @section('content')
 <div class="row">
   <div class="col-xxl">
     <div class="card mb-6">
       <div class="card-header d-flex align-items-center justify-content-between">
-        <h5 class="mb-0">Tambah Form</h5>
+        <h5 class="mb-0">Edit Form</h5>
       </div>
       <div class="card-body">
-        <form action="{{ route('form.simpan') }}" method="POST">
+        <form action="{{ route('form.update', $form->id) }}" method="POST">
           @csrf
+          @method('PUT')
 
           {{-- Form Code --}}
           <div class="row mb-4">
@@ -22,7 +23,7 @@
                 name="code"
                 id="code"
                 class="form-control @error('code') is-invalid @enderror"
-                value="{{ old('code') }}"
+                value="{{ old('code', $form->code) }}"
               >
               @error('code')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -39,7 +40,7 @@
                 name="title"
                 id="title"
                 class="form-control @error('title') is-invalid @enderror"
-                value="{{ old('title') }}"
+                value="{{ old('title', $form->title) }}"
               >
               @error('title')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -57,8 +58,8 @@
                 class="form-control @error('form_type') is-invalid @enderror"
               >
                 <option value="">-- Select Form Type --</option>
-                <option value="survey" {{ old('form_type') == 'survey' ? 'selected' : '' }}>Survey</option>
-                <option value="questionnaire" {{ old('form_type') == 'questionnaire' ? 'selected' : '' }}>Questionnaire</option>
+                <option value="survey" {{ old('form_type', $form->form_type) == 'survey' ? 'selected' : '' }}>Survey</option>
+                <option value="questionnaire" {{ old('form_type', $form->form_type) == 'questionnaire' ? 'selected' : '' }}>Questionnaire</option>
               </select>
               @error('form_type')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -76,7 +77,7 @@
                 class="form-control @error('description') is-invalid @enderror"
                 rows="3"
                 placeholder="Enter form description (optional)"
-              >{{ old('description') }}</textarea>
+              >{{ old('description', $form->description) }}</textarea>
               @error('description')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
@@ -92,7 +93,7 @@
                 name="start_at"
                 id="start_at"
                 class="form-control @error('start_at') is-invalid @enderror"
-                value="{{ old('start_at') ? \Carbon\Carbon::parse(old('start_at'))->format('Y-m-d\TH:i') : '' }}"
+                value="{{ old('start_at') ? \Carbon\Carbon::parse(old('start_at'))->format('Y-m-d\TH:i') : ($form->start_at ? \Carbon\Carbon::parse($form->start_at)->format('Y-m-d\TH:i') : '') }}"
               >
               @error('start_at')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -109,7 +110,7 @@
                 name="end_at"
                 id="end_at"
                 class="form-control @error('end_at') is-invalid @enderror"
-                value="{{ old('end_at') ? \Carbon\Carbon::parse(old('end_at'))->format('Y-m-d\TH:i') : '' }}"
+                value="{{ old('end_at') ? \Carbon\Carbon::parse(old('end_at'))->format('Y-m-d\TH:i') : ($form->end_at ? \Carbon\Carbon::parse($form->end_at)->format('Y-m-d\TH:i') : '') }}"
               >
               @error('end_at')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -126,7 +127,7 @@
                 name="cover_path"
                 id="cover_path"
                 class="form-control @error('cover_path') is-invalid @enderror"
-                value="{{ old('cover_path') }}"
+                value="{{ old('cover_path', $form->cover_path) }}"
                 placeholder="Enter cover path (optional)"
               >
               @error('cover_path')
@@ -144,7 +145,7 @@
                 name="cover_file"
                 id="cover_file"
                 class="form-control @error('cover_file') is-invalid @enderror"
-                value="{{ old('cover_file') }}"
+                value="{{ old('cover_file', $form->cover_file) }}"
                 placeholder="Enter cover file (optional)"
               >
               @error('cover_file')
@@ -155,7 +156,7 @@
 
           <div class="row justify-content-end">
             <div class="col-sm-10">
-              <button type="submit" class="btn btn-primary">Simpan Form</button>
+              <button type="submit" class="btn btn-primary">Update Form</button>
               <a href="{{ url('/form') }}" class="btn btn-secondary ms-2">Cancel</a>
             </div>
           </div>
