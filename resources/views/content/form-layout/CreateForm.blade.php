@@ -10,7 +10,7 @@
         <h5 class="mb-0">Tambah Form</h5>
       </div>
       <div class="card-body">
-        <form action="{{ route('form.simpan') }}" method="POST">
+        <form action="{{ route('form.store') }}" method="POST">
           @csrf
 
           {{-- Form Code --}}

@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between">
       <div class="card-header-left d-flex flex-column">
         <h5 class="mb-5 me-3">Data Form</h5>
-        <a href="{{ route('form.tambah') }}" class="btn btn-primary">
+        <a href="{{ route('form.create') }}" class="btn btn-primary">
           <span class="tf-icons ri-add-line ri-20px me-1_5"></span>Tambah Form
         </a>
       </div>
@@ -28,7 +28,7 @@
       <div id="form-master-table" class="table-responsive text-nowrap">
           <table class="table table-hover">
             <thead>
-              <tr id="form-row-{{ $form->id }}">
+
                 <th>Nomor</th>
                 <th>Kode Form</th>
                 <th>Tipe Form</th>
@@ -50,7 +50,7 @@
                         <a class="dropdown-item" href="{{ route('form.edit', $form->id) }}"><i class="ri-pencil-line me-1"></i> Edit Form</a>
 
                         {{-- Tombol Delete pakai data-id untuk JS --}}
-                        <form action="{{ route('form.hapus', $form->id) }}"
+                        <form action="{{ route('form.delete', $form->id) }}"
                         method="POST"
                         style="display: inline;"
                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus form ini?')">

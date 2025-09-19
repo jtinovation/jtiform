@@ -26,12 +26,12 @@ Route::prefix('auth')->group(function () {
 // 🔹 Form routes (protected)
 //Route::middleware('jwt.verify')->group(function () {
     Route::get('/form-active', [FormController::class, 'showActiveForm'])->name('form.active');
-    Route::get('/form/tambah', [FormController::class, 'tambahForm'])->name('form.tambah');
-    Route::post('/form/simpan', [FormController::class, 'simpanForm'])->name('form.simpan');
+    Route::get('/form/create', [FormController::class, 'createForm'])->name('form.create');
+    Route::post('/form/store', [FormController::class, 'storeForm'])->name('form.store');
 
 Route::get('/form/{form}/edit', [FormController::class, 'editForm'])->name('form.edit');
 Route::put('/form/{form}/update', [FormController::class, 'updateForm'])->name('form.update');
-Route::delete('/form/{id}/hapus', [FormController::class, 'hapusForm'])->name('form.hapus');
+Route::delete('/form/{id}/delete', [FormController::class, 'deleteForm'])->name('form.delete');
 
 //});   // ✅ perbaikan disini
 

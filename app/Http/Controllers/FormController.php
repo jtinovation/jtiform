@@ -4,20 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use App\Models\Question;
-use App\Models\Question;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class FormController extends Controller
 {
     // 🔹 Tampilkan halaman tambah form
-    public function tambahForm()
+    public function createForm()
     {
-        return view('content.form-layout.TambahForm');
+        return view('content.form-layout.CreateForm');
     }
 
   // 🔹 Simpan form baru
- public function simpanForm(Request $request)
+ public function storeForm(Request $request)
     {
         $request->validate([
             'code'        => 'required|string|max:50',
@@ -148,7 +147,7 @@ public function updateForm(Request $request, Form $form)
     return redirect('/form')->with('success', 'Form successfully updated.');
 }
   // 🔹 Hapus form
-public function hapusForm($id)
+public function deleteForm($id)
 {
     try {
 
