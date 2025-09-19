@@ -16,8 +16,8 @@ return new class extends Migration
       $table->uuid('external_id')->nullable();
       $table->string('name');
       $table->string('email');
-      $table->string('token')->nullable();
-      $table->string('roles')->nullable();
+      $table->text('token')->nullable();
+      $table->text('roles')->nullable();
       $table->text('permissions')->nullable();
       $table->timestamps();
     });
