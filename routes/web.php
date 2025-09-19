@@ -24,10 +24,10 @@ Route::prefix('auth')->group(function () {
 });
 
 // 🔹 Form routes (protected)
-//// Route::middleware('jwt.verify')->group(function () {
-Route::get('/form', [FormController::class, 'showActiveForm']);
-Route::get('/form/tambah', [FormController::class, 'tambahForm'])->name('form.tambah');
-Route::post('/form/simpan', [FormController::class, 'simpanForm'])->name('form.simpan');
+//Route::middleware('jwt.verify')->group(function () {
+    Route::get('/form-active', [FormController::class, 'showActiveForm'])->name('form.active');
+    Route::get('/form/tambah', [FormController::class, 'tambahForm'])->name('form.tambah');
+    Route::post('/form/simpan', [FormController::class, 'simpanForm'])->name('form.simpan');
 
 Route::get('/form/{form}/edit', [FormController::class, 'editForm'])->name('form.edit');
 Route::put('/form/{form}/update', [FormController::class, 'updateForm'])->name('form.update');
@@ -36,8 +36,8 @@ Route::delete('/form/{id}/hapus', [FormController::class, 'hapusForm'])->name('f
 //});   // ✅ perbaikan disini
 
 // 🔹 Dashboard route
-Route::get('/form/form-master', [FormController::class, 'showForm']);
+Route::get('/form', [FormController::class, 'showForm']);
 Route::get('/form/{id}/questions', [FormController::class, 'showQuestionList'])->name('form.questions');
 
 // 🔹 Debugging purpose
-Route::get('/table', [FormController::class, 'checkTable']);
+Route::get('/check', [FormController::class, 'checkFile']);

@@ -21,12 +21,12 @@ class AnswerFactory extends Factory
     {
         $questionOptionId = null;
         if(fake()->boolean(33)){
-          $questionOptionId = QuestionOption:: factory();
+          $questionOptionId = QuestionOption:: pluck('id')->random();
         }
 
         return [
-            't_submission_target_id' => SubmissionTarget::factory(),
-            'm_question_id' => Question::factory(),
+            't_submission_target_id' => SubmissionTarget::pluck('id')->random(),
+            'm_question_id' => Question::pluck('id')->random(),
             'text_value' => $questionOptionId && fake()->boolean(33) ? fake()->text() : null,
             'm_question_option_id' => $questionOptionId,
             'score' => fake()->randomFloat(1, 0, 100),

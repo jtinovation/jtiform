@@ -19,8 +19,8 @@ class AnswerOptionFactory extends Factory
     public function definition(): array
     {
         return [
-            't_answer_id' => Answer::factory(),
-            'm_question_option_id' => QuestionOption::factory()
+            't_answer_id' => Answer::pluck('id')->random(),
+            'm_question_option_id' => QuestionOption::pluck('id')->random()
         ];
     }
 }

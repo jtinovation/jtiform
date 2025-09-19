@@ -22,7 +22,7 @@ class QuestionFactory extends Factory
             'type' => fake()->randomElement(['text', 'option', 'checkbox']),
             'sequence' => fake()->randomNumber(1, 10),
             'is_required' => fake()->boolean(),
-            'm_form_id' => Form::factory()
+            'm_form_id' => Form::pluck('id')->random()
         ];
     }
 }

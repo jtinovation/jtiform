@@ -20,7 +20,7 @@ class SubmissionTargetFactory extends Factory
         $targetType = fake()->randomElement(['mk_dosen', 'dosen', 'laboran', 'teknisi', 'unit', 'fasilitas']);
 
         return [
-            't_submission_id' => Submission::factory(),
+            't_submission_id' => Submission::pluck('id')->random(),
             'target_type' => $targetType,
             'target_id' => fake()->uuid(),
             'relation_id' => null,

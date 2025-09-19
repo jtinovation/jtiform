@@ -21,7 +21,7 @@ class FormTargetListFactory extends Factory
         $targetType = fake()->randomElement(['mk_dosen', 'dosen', 'laboran', 'teknisi', 'unit', 'fasilitas']);
 
         return [
-            'm_form_target_rule_id' => FormTargetRule::factory(),
+            'm_form_target_rule_id' => FormTargetRule::pluck('id')->random(),
             'target_type' => $targetType,
             'target_id' => fake()->uuid(),
             'relation_id' => null,

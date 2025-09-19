@@ -25,14 +25,14 @@ class DatabaseSeeder extends Seeder
    * Seed the application's database.
    */
   public function run(): void {
-    Form::factory(10)->create();
-    FormTargetRule::factory(10)->create();
-    FormTargetList::factory(20)->create();
-    Question::factory(50)->create();
+    Form::factory(20)->create();
+    FormTargetRule::factory(20)->create();
+    FormTargetList::factory(30)->create();
+    Question::factory(100)->create();
     QuestionOption::factory(80)->create();
-    Answer::factory(50)->create();
+    Submission::factory(80)->create();
+    SubmissionTarget::factory(25)->create();
+    Answer::factory(80)->create();
     AnswerOption::factory(40)->create();
-    Submission::factory(50)->create();
-    SubmissionTarget::factory(50)->create();
   }
 }
