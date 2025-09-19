@@ -31,7 +31,8 @@ Route::post('/form/simpan', [FormController::class, 'simpanForm'])->name('form.s
 
 Route::get('/form/{form}/edit', [FormController::class, 'editForm'])->name('form.edit');
 Route::put('/form/{form}/update', [FormController::class, 'updateForm'])->name('form.update');
-Route::delete('/form/{form}/hapus', [FormController::class, 'hapusForm'])->name('form.hapus');
+Route::delete('/form/{id}/hapus', [FormController::class, 'hapusForm'])->name('form.hapus');
+
 //});   // ✅ perbaikan disini
 
 // 🔹 Dashboard route

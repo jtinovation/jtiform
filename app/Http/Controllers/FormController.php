@@ -3,47 +3,86 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
+use App\Models\Question;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class FormController extends Controller
 {
-  // 🔹 Tampilkan daftar form
-  public function listForm()
-  {
-    $forms = Form::all();
-    return view('content.form-layout.ListForm', compact('forms'));
-  }
+
 
   // 🔹 Tampilkan halaman tambah form
-  public function tambahForm()
-  {
-    return view('content.form-layout.TambahForm');
-  }
+   public function tambahForm()
+    {
+        return view('content.form-layout.TambahForm');
+    }
 
   // 🔹 Simpan form baru
-  public function simpanForm(Request $request)
-  {
-    $request->validate([
-      'title' => 'required|string|max:255',
-      'description' => 'nullable|string',
-      'is_active' => 'nullable|boolean',
-      'start_at' => 'nullable|date',
-      'end_at' => 'nullable|date|after_or_equal:start_at',
-    ]);
+ public function simpanForm(Request $request)
+    {
+        $request->validate([
+            'code'        => 'required|string|max:50',
+            'form_type'   => 'required|in:questionnaire,survey',
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_at'    => 'required|date',
+            'end_at'      => 'required|date',
+            'cover_path'  => 'nullable|string|max:255',
+            'cover_file'  => 'nullable|string|max:255',
+        ], [
+            'code.required'       => 'Code is required.',
+            'code.max'            => 'Code cannot exceed 50 characters.',
+            'form_type.required'  => 'Form type is required.',
+            'form_type.in'        => 'Form type must be either questionnaire or survey.',
+            'title.required'      => 'Title is required.',
+            'title.max'           => 'Title cannot exceed 255 characters.',
+            'description.string'  => 'Description must be a string.',
+            'start_at.required'   => 'Start date is required.',
+            'start_at.date'       => 'Start date must be a valid date.',
+            'end_at.required'     => 'End date is required.',
+            'end_at.date'         => 'End date must be a valid date.',
+            'cover_path.max'      => 'Cover path cannot exceed 255 characters.',
+            'cover_file.max'      => 'Cover file cannot exceed 255 characters.',
+        ]);
 
-    // simpan form
-    Form::create([
-      'title' => $request->title,
-      'description' => $request->description,
-      'is_active' => $request->is_active ?? false,
-      'start_at' => $request->start_at,
-      'end_at' => $request->end_at,
-    ]);
+        $now     = Carbon::now();
+        $startAt = Carbon::parse($request->start_at);
+        $endAt   = Carbon::parse($request->end_at);
 
-    // redirect ke halaman daftar form aktif
-    return redirect('/form')->with('success', 'Form berhasil dibuat.');
-  }
+       
+        if ($startAt->lt($now->copy()->startOfDay())) {
+            return back()->withErrors(['start_at' => 'Start date cannot be before today.'])->withInput();
+        }
+
+        if ($endAt->lt($now->copy()->startOfDay())) {
+            return back()->withErrors(['end_at' => 'End date cannot be before today.'])->withInput();
+        }
+
+        if ($endAt->lte($startAt)) {
+            return back()->withErrors(['end_at' => 'End date must be after the start date.'])->withInput();
+        }
+
+
+        $isActive = (
+            $startAt->toDateString() <= $now->toDateString() &&
+            $endAt->toDateString()   >= $now->toDateString()
+        ) ? 1 : 0;
+
+
+        $form = new Form();
+        $form->code        = $request->code;
+        $form->form_type   = $request->form_type;
+        $form->title       = $request->title;
+        $form->description = $request->description;
+        $form->start_at    = $startAt->format('Y-m-d H:i:s');
+        $form->end_at      = $endAt->format('Y-m-d H:i:s');
+        $form->cover_path  = $request->cover_path;
+        $form->cover_file  = $request->cover_file;
+        $form->is_active   = $isActive;
+        $form->save();
+
+        return redirect('/form')->with('success', 'Form successfully created.');
+    }
 
   // 🔹 Edit form
   public function editForm(Form $form)
@@ -51,45 +90,89 @@ class FormController extends Controller
     return view('content.form-layout.EditForm', compact('form'));
   }
 
-  // 🔹 Update form
-  public function updateForm(Request $request, Form $form)
-  {
+
+// 🔹 Update form
+public function updateForm(Request $request, Form $form)
+{
     $request->validate([
-      'title' => 'required|string|max:255',
-      'description' => 'nullable|string',
-      'is_active' => 'nullable|boolean',
-      'start_at' => 'nullable|date',
-      'end_at' => 'nullable|date',
+        'code'        => 'required|string|max:50',
+        'form_type'   => 'required|in:questionnaire,survey',
+        'title'       => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'start_at'    => 'required|date',
+        'end_at'      => 'required|date',
+        'cover_path'  => 'nullable|string|max:255',
+        'cover_file'  => 'nullable|string|max:255',
+    ], [
+        'code.required'       => 'Code is required.',
+        'code.max'            => 'Code cannot exceed 50 characters.',
+        'form_type.required'  => 'Form type is required.',
+        'form_type.in'        => 'Form type must be either questionnaire or survey.',
+        'title.required'      => 'Title is required.',
+        'title.max'           => 'Title cannot exceed 255 characters.',
+        'description.string'  => 'Description must be a string.',
+        'start_at.required'   => 'Start date is required.',
+        'start_at.date'       => 'Start date must be a valid date.',
+        'end_at.required'     => 'End date is required.',
+        'end_at.date'         => 'End date must be a valid date.',
+        'cover_path.max'      => 'Cover path cannot exceed 255 characters.',
+        'cover_file.max'      => 'Cover file cannot exceed 255 characters.',
     ]);
 
-    $form->update($request->all());
+    $now     = Carbon::now();
+    $startAt = Carbon::parse($request->start_at);
+    $endAt   = Carbon::parse($request->end_at);
 
-    return redirect('/form')->with('success', 'Form berhasil diperbarui.');
-  }
 
+    if ($endAt->lte($startAt)) {
+        return back()->withErrors(['end_at' => 'End date must be after the start date.'])->withInput();
+    }
+
+
+    $isActive = (
+        $startAt->toDateString() <= $now->toDateString() &&
+        $endAt->toDateString()   >= $now->toDateString()
+    ) ? 1 : 0;
+
+
+    $form->code        = $request->code;
+    $form->form_type   = $request->form_type;
+    $form->title       = $request->title;
+    $form->description = $request->description;
+    $form->start_at    = $startAt->format('Y-m-d H:i:s');
+    $form->end_at      = $endAt->format('Y-m-d H:i:s');
+    $form->cover_path  = $request->cover_path;
+    $form->cover_file  = $request->cover_file;
+    $form->is_active   = $isActive;
+    $form->save();
+
+    return redirect('/form')->with('success', 'Form successfully updated.');
+}
   // 🔹 Hapus form
-  public function hapusForm(Form $form)
-  {
-    $form->delete();
+public function hapusForm($id)
+{
+    try {
 
-    return redirect('/form')->with('success', 'Form berhasil dihapus.');
-  }
+        $form = Form::findOrFail($id);
+        $form->delete();
+
+        return redirect('/form')->with('success', 'Form berhasil dihapus.');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Form tidak ditemukan atau gagal dihapus.');
+    }
+}
 
   // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
   public function showActiveForm()
-  {
-    $now = Carbon::now();
+    {
+        $now = Carbon::now();
 
-    $forms = Form::where(function ($q) use ($now) {
-      $q->whereNull('start_at')->orWhere('start_at', '<=', $now);
-    })
-      ->where(function ($q) use ($now) {
-        $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
-      })
-      ->get();
+        $forms = Form::whereDate('start_at', '<=', $now->toDateString())
+                     ->whereDate('end_at', '>=', $now->toDateString())
+                     ->get();
 
-    return view('content.form.form-active', compact('forms'));
-  }
+        return view('content.form.form-active', compact('forms'));
+    }
 
   // 🔹 Tampilkan semua form
   public function showForm()
