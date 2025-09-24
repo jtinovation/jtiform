@@ -61,7 +61,9 @@
                           </button>
                         </form>
 
-                        <a class="dropdown-item" href=" {{route('form.questions', ['id' => $form->id])}} "><i class="ri-questionnaire-line me-1"></i> List Pertanyaan</a>
+                        <a class="dropdown-item" href="{{ route('forms.questions.index', $form->id) }}">
+                        <i class="ri-questionnaire-line me-1"></i> List Pertanyaan</a>
+
                       </div>
                   </div>
                 </td>

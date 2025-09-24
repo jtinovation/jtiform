@@ -17,4 +17,15 @@ class QuestionOption extends Model
       'sequence',
       'point'
     ];
+
+    public function question()
+{
+    return $this->belongsTo(Question::class, 'm_question_id', 'id');
+}
+
+public function answers()
+{
+    return $this->hasMany(Answer::class, 'm_question_option_id', 'id');
+}
+
 }

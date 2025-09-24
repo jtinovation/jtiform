@@ -18,4 +18,21 @@ class Question extends Model
       'is_required',
       'm_form_id'
     ];
+    
+    public function form()
+{
+    return $this->belongsTo(Form::class, 'm_form_id', 'id');
+}
+
+public function options()
+{
+    return $this->hasMany(QuestionOption::class, 'm_question_id', 'id')
+                ->orderBy('sequence');
+}
+
+public function answers()
+{
+    return $this->hasMany(Answer::class, 'm_question_id', 'id');
+}
+
 }
