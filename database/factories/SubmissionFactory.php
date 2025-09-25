@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Form;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -27,7 +28,7 @@ class SubmissionFactory extends Factory
 
         return [
             'm_form_id' => Form::pluck('id')->random(),
-            'm_user_id' =>  $isAnonymous ? null : fake()->uuid(),
+            'm_user_id' =>  $isAnonymous ? null : User::pluck('id')->random(),
             'started_at' => $startTime,
             'submitted_at' => $endTime,
             'status' => fake()->randomElement(['in_progress', 'submitted', 'invalidated']),

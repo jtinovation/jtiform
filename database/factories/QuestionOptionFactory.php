@@ -20,7 +20,7 @@ class QuestionOptionFactory extends Factory
         return [
             'm_question_id' => Question::pluck('id')->random(),
             'answer' => fake()->text(),
-            'sequence' => fake()->randomNumber(1, 10),
+            'sequence' => fake()->numberBetween(1, 10),
             'point' => fake()->numberBetween(0, 100)
           ];
     }

@@ -21,7 +21,7 @@ class AnswerFactory extends Factory
     {
         $questionOptionId = null;
         if(fake()->boolean(33)){
-          $questionOptionId = QuestionOption:: pluck('id')->random();
+          $questionOptionId = QuestionOption::pluck('id')->random();
         }
 
         return [

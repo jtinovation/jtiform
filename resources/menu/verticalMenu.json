@@ -10,10 +10,10 @@
       "menuHeader": "Forms & Tables"
     },
     {
-      "url": "/form-active",
+      "url": "/form/active",
       "name": "Form",
       "icon": "menu-icon tf-icons ri-radio-button-line",
-      "slug": "forms"
+      "slug": "form.active"
     },
     {
       "name": "Form Master",

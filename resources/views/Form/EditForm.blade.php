@@ -81,7 +81,7 @@
                             @foreach($question->options as $optIndex => $option)
                                 <div class="d-flex gap-2 mb-2 option-row">
                                     <input type="text" name="questions[{{ $index }}][answers][]"
-                                           value="{{ $option->text }}" class="form-control" placeholder="Opsi {{ chr(65 + $optIndex) }}">
+                                           value="{{ $option->answer }}" class="form-control" placeholder="Opsi {{ chr(65 + $optIndex) }}">
                                     <button type="button" class="btn btn-danger btn-sm remove-option">X</button>
                                 </div>
                             @endforeach

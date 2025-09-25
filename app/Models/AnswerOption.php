@@ -17,13 +17,12 @@ class AnswerOption extends Model
     ];
 
     public function answer()
-{
-    return $this->belongsTo(Answer::class, 't_answer_id', 'id');
-}
+    {
+        return $this->belongsTo(Answer::class, 't_answer_id');
+    }
 
-public function option()
-{
-    return $this->belongsTo(QuestionOption::class, 'm_question_option_id', 'id');
-}
-
+    public function questionOption()
+    {
+        return $this->belongsTo(QuestionOption::class, 'm_question_option_id');
+    }
 }

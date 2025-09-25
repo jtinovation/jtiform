@@ -25,13 +25,17 @@ Route::middleware('auth')->group(function () {
 
   Route::prefix('form')->group(function () {
     Route::get('/', [FormController::class, 'index'])->name('form.index');
+    Route::get('/active', [FormController::class, 'showActiveForm'])->name('form.active');
     Route::get('/create', [FormController::class, 'create'])->name('form.create');
     Route::post('/store', [FormController::class, 'store'])->name('form.store');
     Route::get('/{id}', [FormController::class, 'show'])->name('form.show');
+    Route::get('/{id}/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
     Route::get('/{id}/edit', [FormController::class, 'edit'])->name('form.edit');
     Route::put('/{id}', [FormController::class, 'update'])->name('form.update');
     Route::post('/{id}/restore', [FormController::class, 'restore'])->name('form.restore');
     Route::delete('/{id}', [FormController::class, 'delete'])->name('form.delete');
+    Route::get('/{id}/fill', [FormController::class, 'fillForm'])->name('form.fill');
+    Route::post('/{id}/submit', [FormController::class, 'submitForm'])->name('form.submit');
 
     Route::prefix('/{id}/questions')->group(function () {
       Route::get('/', [QuestionController::class, 'index'])->name('form.question.index');
@@ -47,7 +51,6 @@ Route::middleware('auth')->group(function () {
 
 // 🔹 Form routes (protected)
 //Route::middleware('jwt.verify')->group(function () {
-//     Route::get('/form-active', [FormController::class, 'showActiveForm'])->name('form.active');
 //     Route::get('/form/tambah', [FormController::class, 'tambahForm'])->name('form.tambah');
 //     Route::post('/form/simpan', [FormController::class, 'simpanForm'])->name('form.simpan');
 

@@ -17,9 +17,12 @@ return new class extends Migration
             ->constrained('m_form')
             ->cascadeOnUpdate()
             ->cascadeOnDelete();
-            $table->uuid('m_user_id')->nullable();
+            $table->foreignUuid('m_user_id')->nullable()
+            ->constrained('m_user')
+            ->cascadeOnUpdate()
+            ->cascadeOnDelete();
             $table->dateTime('started_at');
-            $table->dateTime('submitted_at');
+            $table->dateTime('submitted_at')->nullable();
             $table->string('status', 16);
             $table->boolean('is_anonymous');
             $table->boolean('is_valid');
