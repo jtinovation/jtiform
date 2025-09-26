@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('m_form', function (Blueprint $table) {
       $table->uuid('id')->primary();
       $table->string('code');
-      $table->enum('type', ['questionnaire', 'survey']);
+      $table->enum('type', ['general', 'lecture_evaluation']);
       $table->string('cover_path')->nullable();
       $table->string('cover_file')->nullable();
       $table->string('title');

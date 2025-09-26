@@ -14,6 +14,11 @@ class FormController extends Controller
   {
     return view('content.form-layout.TambahForm');
   }
+    // 🔹 Tampilkan halaman tambah form
+    public function createForm()
+    {
+        return view('content.form-layout.CreateForm');
+    }
 
   // 🔹 Simpan form baru
   public function simpanForm(Request $request)
@@ -42,6 +47,32 @@ class FormController extends Controller
       'cover_path.max'      => 'Cover path cannot exceed 255 characters.',
       'cover_file.max'      => 'Cover file cannot exceed 255 characters.',
     ]);
+ public function storeForm(Request $request)
+    {
+        $request->validate([
+            'code'        => 'required|string|max:50',
+            'form_type'   => 'required|in:questionnaire,survey',
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_at'    => 'required|date',
+            'end_at'      => 'required|date',
+            'cover_path'  => 'nullable|string|max:255',
+            'cover_file'  => 'nullable|string|max:255',
+        ], [
+            'code.required'       => 'Code is required.',
+            'code.max'            => 'Code cannot exceed 50 characters.',
+            'form_type.required'  => 'Form type is required.',
+            'form_type.in'        => 'Form type must be either questionnaire or survey.',
+            'title.required'      => 'Title is required.',
+            'title.max'           => 'Title cannot exceed 255 characters.',
+            'description.string'  => 'Description must be a string.',
+            'start_at.required'   => 'Start date is required.',
+            'start_at.date'       => 'Start date must be a valid date.',
+            'end_at.required'     => 'End date is required.',
+            'end_at.date'         => 'End date must be a valid date.',
+            'cover_path.max'      => 'Cover path cannot exceed 255 characters.',
+            'cover_file.max'      => 'Cover file cannot exceed 255 characters.',
+        ]);
 
     $now     = Carbon::now();
     $startAt = Carbon::parse($request->start_at);
@@ -149,6 +180,8 @@ class FormController extends Controller
   // 🔹 Hapus form
   public function hapusForm($id)
   {
+public function deleteForm($id)
+{
     try {
 
       $form = Form::findOrFail($id);
@@ -234,5 +267,7 @@ class FormController extends Controller
   public function checkFile()
   {
     return view('content.user-interface.ui-pagination-breadcrumbs');
+  }
+}
   }
 }
