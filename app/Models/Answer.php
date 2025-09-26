@@ -19,20 +19,4 @@ class Answer extends Model
       'score',
       'checked_at'
     ];
-
-    public function question()
-{
-    return $this->belongsTo(Question::class, 'm_question_id', 'id');
-}
-
-public function option()
-{
-    return $this->belongsTo(QuestionOption::class, 'm_question_option_id', 'id');
-}
-
-public function answerOptions()
-{
-    return $this->hasMany(AnswerOption::class, 't_answer_id', 'id');
-}
-
 }

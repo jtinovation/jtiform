@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Form;
 use App\Models\Question;
+use App\Models\Answer;
+use App\Models\Submission;
+use App\Models\SubmissionTarget;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -193,10 +197,10 @@ public function deleteForm($id)
     }
   }
 
-  // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
-  public function showActiveForm(Request $request)
-  {
-    $search = $request->query('search-input');
+    // 🔹 Tampilkan form aktif berdasarkan tanggal sekarang
+    public function showActiveForm(Request $request)
+      {
+        $search = $request->query('search-input');
 
     $now = Carbon::now();
 
@@ -263,6 +267,41 @@ public function deleteForm($id)
 
     return view('content.form.questions', compact('questions'));
   }
+
+    public function showFormDetail($formId)
+    {
+        $userId = auth()->id();
+
+        $form = Form::findOrFail($formId);
+
+        $submission = Submission::where('m_form_id', $formId)
+            ->where('m_user_id', $userId)
+            ->first();
+
+        if (!$submission) {
+            return redirect()->back()->with('error', 'Anda belum mengerjakan form ini.');
+        }
+
+        $submissionTarget = SubmissionTarget::where('t_submission_id', $submission->id)
+            ->first();
+
+        if (!$submissionTarget) {
+            return redirect()->back()->with('error', 'Data submission target tidak ditemukan.');
+        }
+
+        $questions = Question::with([
+            'options', // Semua opsi untuk radio/checkbox
+            'answers' => function($query) use ($submissionTarget) {
+                $query->where('t_submission_target_id', $submissionTarget->id)
+                      ->with(['selectedOption', 'answerOptions.questionOption']);
+            }
+        ])
+        ->where('m_form_id', $formId)
+        ->orderBy('sequence', 'asc')
+        ->paginate(10);
+
+        return view('content.form.detail-form', compact('form', 'questions', 'submission'));
+    }
 
   public function checkFile()
   {

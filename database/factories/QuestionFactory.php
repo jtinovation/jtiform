@@ -20,7 +20,7 @@ class QuestionFactory extends Factory
         return [
             'question' => fake()->sentence() . '?',
             'type' => fake()->randomElement(['text', 'option', 'checkbox']),
-            'sequence' => fake()->randomNumber(1, 10),
+            'sequence' => fake()->numberBetween(1, 10),
             'is_required' => fake()->boolean(),
             'm_form_id' => Form::pluck('id')->random()
         ];

@@ -53,10 +53,10 @@
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
-                    @foreach ($forms as $form)
+                    @foreach ($forms as $index => $form)
                         <tr>
                             <td>
-                                {{ $loop->iteration }}
+                                {{ $forms->firstItem() + $index }}
                             </td>
                             <td>
                                 {{ $form->code }}

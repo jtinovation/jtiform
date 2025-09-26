@@ -1,71 +1,87 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Form - Form Aktif')
-
-@section('content')
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Data Form Aktif</h5>
-            <form class="d-flex">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text"><i class="tf-icons ri-search-line"></i></span>
-                    <input type="text" class="form-control search-input" name="search-input"
-                        data-target="#form-active-table" placeholder="Search..." />
-                </div>
-            </form>
-        </div>
-
-        <div class="dynamic-content-container">
-            <div class="card-body py-0">
-                <div id="form-active-table" class="table-responsive text-nowrap">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nomor</th>
-                                <th>Kode Form</th>
-                                <th>Tipe Form</th>
-                                <th>Judul Form</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            @forelse ($forms as $index => $form)
-                                <tr>
-                                    <td>{{ $forms->firstItem() + $index }}.</td>
-                                    <td> {{ $form->code }} </td>
-                                    <td> {{ $form->type }} </td>
-                                    <td> {{ $form->title }} </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                                data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="javascript:void(0);"><i
-                                                        class="ri-pencil-line me-1"></i> Mengerjakan Form</a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        <p class="mb-0">Tidak ada form aktif</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                {{ $forms->links('vendor.pagination.bootstrap-5') }}
-            </div>
-
-        </div>
-    </div>
-
-@endsection
+@section('title', 'Form')
 
 @section('page-script')
-    <script src="{{ asset('vendor/flasher/jquery.min.js') }}"></script>
-    @vite(['resources/assets/js/form-search.js'])
+    @vite('resources/assets/js/index-forms.js')
+@endsection
+
+@section('content')
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-style1">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active">Form</li>
+        </ol>
+    </nav>
+    <div class="card">
+        <div class="row g-2 align-items-center my-3 mx-1">
+            <div class="col-12 col-md">
+                <form action="{{ route('form.active') }}" method="GET" id="form-filter">
+                    <div class="row g-2 justify-content-md-end">
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="input-group input-group-sm">
+                                <input type="search" class="form-control" placeholder="Cari berdasarkan nama"
+                                    id="search" name="search" value="{{ request('search') }}">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>Tipe</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @foreach ($forms as $index=> $form)
+                        <tr>
+                            <td>
+                                {{ $forms->firstItem() + $index }}
+                            </td>
+                            <td>
+                                {{ $form->code }}
+                            </td>
+                            <td>
+                                {{ $form->title }} @if ($form->trashed())
+                                    <span class="badge bg-label-danger">Terhapus</span>
+                                @endif
+                            </td>
+                            <td>
+                                {{ $form->type }}
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                  <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
+                                  <div class="dropdown-menu">
+                                    @if($submissionStatus[$form->id])
+                                        <a class="dropdown-item" href="{{route('form.result', ['id' => $form->id])}}"><i class="ri-file-list-2-line me-1"></i>  Hasil Pengerjaan</a>
+                                    @else
+                                        <a class="dropdown-item" href="{{route('form.fill', ['id' => $form->id])}}"><i class="ri-edit-line me-1"></i> Mengerjakan Form</a>
+                                    @endif
+                                  </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    @if ($forms->isEmpty())
+                        <tr>
+                            <td colspan="5" class="text-center">No data available</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+
+        {{ $forms->links('vendor.pagination.bootstrap-5') }}
+    </div>
 @endsection
