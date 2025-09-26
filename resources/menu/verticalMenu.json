@@ -18,12 +18,12 @@
     {
       "name": "Form Master",
       "icon": "menu-icon tf-icons ri-box-3-line",
-      "slug": "form-layouts",
+      "slug": "form",
       "submenu": [
         {
           "url": "/form",
           "name": "Form",
-          "slug": "form-layouts-vertical"
+          "slug": "form.index"
         }
       ]
     }

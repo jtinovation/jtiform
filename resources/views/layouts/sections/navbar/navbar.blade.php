@@ -16,14 +16,14 @@
         <div class="{{ $containerNav }}">
 @endif
 
-      <!--  Brand demo (display only for navbar-full and hide on below xl) -->
-      @if(isset($navbarFull))
-      <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-6">
-        <a href="{{url('/dashboard')}}" class="app-brand-link gap-2">
-          <span class="app-brand-logo demo">
-            <img src="{{ asset('img/brand/logo-jti.png') }}" alt="Logo" height="40">
-          </span>
-          <span class="app-brand-text demo menu-text fw-semibold ms-1">{{config('variables.templateName')}}</span>
+<!--  Brand demo (display only for navbar-full and hide on below xl) -->
+@if (isset($navbarFull))
+    <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-6">
+        <a href="{{ url('/dashboard') }}" class="app-brand-link gap-2">
+            <span class="app-brand-logo demo">
+                <img src="{{ asset('assets/img/brand/logo-jti.png') }}" alt="Logo" height="40">
+            </span>
+            <span class="app-brand-text demo menu-text fw-semibold ms-1">{{ config('variables.templateName') }}</span>
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
             <i class="ri-close-fill align-middle"></i>
@@ -41,16 +41,16 @@
     </div>
 @endif
 
-      <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-        {{-- <!-- Search -->
+<div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+    {{-- <!-- Search -->
         <div class="navbar-nav align-items-center">
           <div class="nav-item d-flex align-items-center">
             <i class="ri-search-line ri-22px me-1_5"></i>
             <input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2 ms-50" placeholder="Search..." aria-label="Search...">
           </div>
         </div> --}}
-        <!-- /Search -->
-        <ul class="navbar-nav flex-row align-items-center ms-auto">
+    <!-- /Search -->
+    <ul class="navbar-nav flex-row align-items-center ms-auto">
 
 
         <!-- User -->

@@ -16,7 +16,7 @@ class Form extends Model
 
     protected $fillable = [
         'code',
-        'form_type',
+        'type',
         'cover_path',
         'cover_file',
         'title',
@@ -32,9 +32,9 @@ class Form extends Model
     ];
 
     public function questions()
-        {
-            return $this->hasMany(Question::class,'m_form_id', 'id');
-        }
+    {
+        return $this->hasMany(Question::class, 'm_form_id', 'id');
+    }
     public function getRouteKeyName()
     {
         return 'id';
@@ -51,6 +51,4 @@ class Form extends Model
         // fallback ke nilai dari database
         return $value;
     }
-
-
 }

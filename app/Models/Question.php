@@ -8,31 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    use HasFactory, HasUuids;
+  use HasFactory, HasUuids;
 
-    protected $table = 'm_question';
-    protected $fillable = [
-      'question',
-      'type',
-      'sequence',
-      'is_required',
-      'm_form_id'
-    ];
-    
-    public function form()
-{
-    return $this->belongsTo(Form::class, 'm_form_id', 'id');
-}
+  protected $table = 'm_question';
+  protected $fillable = [
+    'question',
+    'type',
+    'sequence',
+    'is_required',
+    'm_form_id'
+  ];
 
-public function options()
-{
-    return $this->hasMany(QuestionOption::class, 'm_question_id', 'id')
-                ->orderBy('sequence');
-}
-
-public function answers()
-{
-    return $this->hasMany(Answer::class, 'm_question_id', 'id');
-}
-
+  public function options()
+  {
+    return $this->hasMany(QuestionOption::class, 'm_question_id', 'id')->orderBy('sequence', 'asc');
+  }
 }
