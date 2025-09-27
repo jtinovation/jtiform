@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\SuperAppApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 // use App\Http\Controllers\FormController;
@@ -46,23 +47,11 @@ Route::middleware('auth')->group(function () {
       // Route::delete('/{questionId}', [FormController::class, 'deleteQuestion'])->name('form.questions.delete');
     });
   });
+
+  Route::prefix('api')->group(function () {
+    Route::get('/major/option', [SuperAppApiController::class, 'majorOption'])->name('api.major.option');
+    Route::get('/study-program/option', [SuperAppApiController::class, 'studyProgramOption'])->name('api.study_program.option');
+    Route::get('/student/option', [SuperAppApiController::class, 'studentOption'])->name('api.student.option');
+    Route::get('/staff/option', [SuperAppApiController::class, 'staffOption'])->name('api.staff.option');
+  });
 });
-
-
-// 🔹 Form routes (protected)
-//Route::middleware('jwt.verify')->group(function () {
-//     Route::get('/form/tambah', [FormController::class, 'tambahForm'])->name('form.tambah');
-//     Route::post('/form/simpan', [FormController::class, 'simpanForm'])->name('form.simpan');
-
-// Route::get('/form/{form}/edit', [FormController::class, 'editForm'])->name('form.edit');
-// Route::put('/form/{form}/update', [FormController::class, 'updateForm'])->name('form.update');
-// Route::delete('/form/{id}/hapus', [FormController::class, 'hapusForm'])->name('form.hapus');
-
-// //});   // ✅ perbaikan disini
-
-// // 🔹 Dashboard route
-// // Route::get('/form', [FormController::class, 'showForm']);
-// Route::get('/form/{id}/questions', [FormController::class, 'showQuestionList'])->name('form.questions');
-
-// 🔹 Debugging purpose
-Route::get('/check', [FormController::class, 'checkFile']);

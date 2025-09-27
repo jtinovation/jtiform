@@ -10,45 +10,30 @@ use Carbon\Carbon;
 
 class Form extends Model
 {
-    use HasFactory, SoftDeletes, HasUuids;
+  use HasFactory, SoftDeletes, HasUuids;
 
-    protected $table = 'm_form';
+  protected $table = 'm_form';
 
-    protected $fillable = [
-        'code',
-        'type',
-        'cover_path',
-        'cover_file',
-        'title',
-        'description',
-        'is_active',
-        'start_at',
-        'end_at',
-    ];
+  protected $fillable = [
+    'code',
+    'type',
+    'cover_path',
+    'cover_file',
+    'title',
+    'description',
+    'is_active',
+    'start_at',
+    'end_at',
+    'respondents'
+  ];
 
-    protected $casts = [
-        'start_at' => 'datetime',
-        'end_at'   => 'datetime',
-    ];
+  protected $casts = [
+    'start_at' => 'datetime',
+    'end_at'   => 'datetime',
+  ];
 
-    public function questions()
-    {
-        return $this->hasMany(Question::class, 'm_form_id', 'id');
-    }
-    public function getRouteKeyName()
-    {
-        return 'id';
-    }
-    public function getIsActiveAttribute($value)
-    {
-        $now = now();
-
-        // kalau ada start_at & end_at → cek realtime
-        if ($this->start_at && $this->end_at) {
-            return ($this->start_at <= $now && $this->end_at >= $now) ? 1 : 0;
-        }
-
-        // fallback ke nilai dari database
-        return $value;
-    }
+  public function questions()
+  {
+    return $this->hasMany(Question::class, 'm_form_id', 'id');
+  }
 }

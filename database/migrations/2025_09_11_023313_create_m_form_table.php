@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\FormTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +15,7 @@ return new class extends Migration
     Schema::create('m_form', function (Blueprint $table) {
       $table->uuid('id')->primary();
       $table->string('code');
-      $table->enum('type', ['questionnaire', 'survey']);
+      $table->enum('type', FormTypeEnum::toArray());
       $table->string('cover_path')->nullable();
       $table->string('cover_file')->nullable();
       $table->string('title');
@@ -22,6 +23,7 @@ return new class extends Migration
       $table->boolean('is_active')->default(true);
       $table->dateTime('start_at');
       $table->dateTime('end_at');
+      $table->text('respondents')->nullable();
       $table->timestamps();
       $table->softDeletes();
     });

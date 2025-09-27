@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\FormTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,7 @@ class FormFactory extends Factory
   {
     return [
       'code' => fake()->unique()->bothify('??##??##'),
-      'type' => fake()->randomElement(['questionnaire', 'survey']),
+      'type' => fake()->randomElement(FormTypeEnum::toArray()),
       'cover_path' => 'images/covers',
       'cover_file' => fake()->numerify('cover-#####.jpg'),
       'title' => fake()->sentence(5),

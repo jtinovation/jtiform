@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Global\Form;
 
+use App\Enums\FormRespondentTypeEnum;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Global\Form\StoreFormRequest;
@@ -45,6 +46,20 @@ class FormController extends Controller
   {
     $validated = $request->validated();
 
+    $respondents = [
+      'type' => $validated['responden_type'],
+      'id' => null
+    ];
+    if ($validated['responden_type'] === FormRespondentTypeEnum::ALL->value) {
+      $respondents['id'] = null;
+    } else if ($validated['responden_type'] === FormRespondentTypeEnum::MAJOR->value) {
+      $respondents['id'] = $validated['major_id'];
+    } elseif ($validated['responden_type'] === FormRespondentTypeEnum::STUDY_PROGRAM->value) {
+      $respondents['id'] = $validated['study_program_id'];
+    } else {
+      $respondents['id'] = $validated['respondent_ids'];
+    }
+
     if ($request->hasFile('cover')) {
       $validated['cover_file'] = FileHelper::storeFile($request->file('cover'), '/form');
       $validated['cover_path'] = '/form';
@@ -59,6 +74,7 @@ class FormController extends Controller
       'end_at' => $validated['end_at'],
       'cover_path' => $validated['cover_path'] ?? null,
       'cover_file' => $validated['cover_file'] ?? null,
+      'respondents' => json_encode($respondents)
     ]);
 
     return redirect()->route('form.index')->with('success', 'Form berhasil dibuat.');
@@ -185,15 +201,15 @@ class FormController extends Controller
       ->get();
 
     $submission = Submission::where('m_form_id', $formId)
-        ->where('m_user_id', $userId)
-        ->first();
+      ->where('m_user_id', $userId)
+      ->first();
 
     if (!$submission) {
-        return redirect()->back()->with('error', 'Anda belum mengerjakan form ini.');
+      return redirect()->back()->with('error', 'Anda belum mengerjakan form ini.');
     }
 
     $submissionTarget = SubmissionTarget::where('t_submission_id', $submission->id)
-        ->first();
+      ->first();
 
     $answers = Answer::where('t_submission_target_id', $submissionTarget->id)
       ->with('answerOptions')
@@ -257,68 +273,68 @@ class FormController extends Controller
       ->first();
 
     if (!$submission) {
-        return redirect()->route('form.active')->with('error', 'Session form tidak ditemukan. Silakan buka form kembali.');
+      return redirect()->route('form.active')->with('error', 'Session form tidak ditemukan. Silakan buka form kembali.');
     }
 
     if ($submission->submitted_at) {
-        return redirect()->route('form.active')->with('error', 'Anda sudah mengumpulkan form ini sebelumnya.');
+      return redirect()->route('form.active')->with('error', 'Anda sudah mengumpulkan form ini sebelumnya.');
     }
 
     $submission->update([
-        'submitted_at' => now(),
-        'status' => 'completed',
-        'is_valid' => true
+      'submitted_at' => now(),
+      'status' => 'completed',
+      'is_valid' => true
     ]);
 
     $submissionTarget = SubmissionTarget::where('t_submission_id', $submission->id)->first();
     if ($request->has('answer')) {
-        $questions = Question::whereIn('id', array_keys($request->answer))
-                           ->get()
-                           ->keyBy('id');
+      $questions = Question::whereIn('id', array_keys($request->answer))
+        ->get()
+        ->keyBy('id');
 
-        foreach ($request->answer as $questionId => $answer) {
-            $question = $questions->get($questionId);
+      foreach ($request->answer as $questionId => $answer) {
+        $question = $questions->get($questionId);
 
-            if (!$question) continue;
+        if (!$question) continue;
 
-            if (is_array($answer)) {
-                $answerRecord = Answer::create([
-                    't_submission_target_id' => $submissionTarget->id,
-                    'm_question_id' => $questionId,
-                    'text_value' => null,
-                    'm_question_option_id' => null,
-                    'score' => 0,
-                    'checked_at' => now()
-                ]);
+        if (is_array($answer)) {
+          $answerRecord = Answer::create([
+            't_submission_target_id' => $submissionTarget->id,
+            'm_question_id' => $questionId,
+            'text_value' => null,
+            'm_question_option_id' => null,
+            'score' => 0,
+            'checked_at' => now()
+          ]);
 
-                foreach ($answer as $optionId) {
-                    AnswerOption::create([
-                        't_answer_id' => $answerRecord->id,
-                        'm_question_option_id' => $optionId
-                    ]);
-                }
-            } else {
-                if ($question->type === 'text') {
-                    Answer::create([
-                        't_submission_target_id' => $submissionTarget->id,
-                        'm_question_id' => $questionId,
-                        'text_value' => $answer,
-                        'm_question_option_id' => null,
-                        'score' => 0,
-                        'checked_at' => now()
-                    ]);
-                } else {
-                    Answer::create([
-                        't_submission_target_id' => $submissionTarget->id,
-                        'm_question_id' => $questionId,
-                        'text_value' => null,
-                        'm_question_option_id' => $answer,
-                        'score' => 0,
-                        'checked_at' => now()
-                    ]);
-                }
-            }
+          foreach ($answer as $optionId) {
+            AnswerOption::create([
+              't_answer_id' => $answerRecord->id,
+              'm_question_option_id' => $optionId
+            ]);
+          }
+        } else {
+          if ($question->type === 'text') {
+            Answer::create([
+              't_submission_target_id' => $submissionTarget->id,
+              'm_question_id' => $questionId,
+              'text_value' => $answer,
+              'm_question_option_id' => null,
+              'score' => 0,
+              'checked_at' => now()
+            ]);
+          } else {
+            Answer::create([
+              't_submission_target_id' => $submissionTarget->id,
+              'm_question_id' => $questionId,
+              'text_value' => null,
+              'm_question_option_id' => $answer,
+              'score' => 0,
+              'checked_at' => now()
+            ]);
+          }
         }
+      }
     }
 
     return redirect()->route('form.active')->with('success', 'Form berhasil dikumpulkan!');

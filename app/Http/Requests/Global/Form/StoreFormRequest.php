@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Global\Form;
 
+use App\Enums\FormRespondentTypeEnum;
+use App\Enums\FormTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
  * @method bool hasFile(string $key)
  * @method \Illuminate\Http\UploadedFile|null file(string $key, mixed $default = null)
+ * @method mixed input(string $key = null, mixed $default = null)
  */
 class StoreFormRequest extends FormRequest
 {
@@ -28,12 +31,35 @@ class StoreFormRequest extends FormRequest
   {
     return [
       'code'        => ['required', Rule::unique('m_form', 'code')],
-      'type'        => ['required', Rule::in(['questionnaire', 'survey'])],
+      'type'        => ['required', Rule::in(FormTypeEnum::toArray())],
       'title'       => ['required', 'string', 'max:255'],
       'description' => ['nullable', 'string'],
       'start_at'    => ['required', 'date'],
       'end_at'      => ['required', 'date', 'after_or_equal:start_at'],
       'cover'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // KB
+      'responden_type' => ['required', Rule::in(FormRespondentTypeEnum::toArray())],
+      'major_id' => [
+        Rule::requiredIf($this->input('responden_type') === FormRespondentTypeEnum::MAJOR->value),
+        'string',
+        'uuid'
+      ],
+      'study_program_id' => [
+        Rule::requiredIf($this->input('responden_type') === FormRespondentTypeEnum::STUDY_PROGRAM->value),
+        'string',
+        'uuid'
+      ],
+      'respondent_ids' => [
+        Rule::requiredIf(in_array($this->input('responden_type'), [
+          FormRespondentTypeEnum::LECTURER->value,
+          FormRespondentTypeEnum::EDUCATIONAL_STAFF->value,
+          FormRespondentTypeEnum::STUDENT->value
+        ])),
+        'array'
+      ],
+      'respondent_ids.*' => [
+        'string',
+        'uuid'
+      ]
     ];
   }
 
@@ -54,6 +80,18 @@ class StoreFormRequest extends FormRequest
       'cover.image'            => 'File harus berupa gambar.',
       'cover.mimes'            => 'Format gambar harus jpeg, png, jpg, atau gif.',
       'cover.max'              => 'Ukuran gambar maksimal 2MB.',
+      'responden_type.required' => 'Tipe responden wajib diisi.',
+      'responden_type.in'      => 'Tipe responden tidak valid.',
+      'major_id.required'      => 'Jurusan wajib diisi jika tipe responden adalah jurusan.',
+      'major_id.string'        => 'Jurusan tidak valid.',
+      'major_id.uuid'          => 'Jurusan tidak valid.',
+      'study_program_id.required' => 'Program studi wajib diisi jika tipe responden adalah program studi.',
+      'study_program_id.string'   => 'Program studi tidak valid.',
+      'study_program_id.uuid'     => 'Program studi tidak valid.',
+      'respondent_ids.required'   => 'Daftar responden wajib diisi untuk tipe responden terpilih.',
+      'respondent_ids.array'      => 'Daftar responden tidak valid.',
+      'respondent_ids.*.string'   => 'Responden tidak valid.',
+      'respondent_ids.*.uuid'     => 'Responden tidak valid.',
     ];
   }
 }
