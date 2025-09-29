@@ -8,15 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class SubmissionTarget extends Model
 {
-    use HasFactory, HasUuids;
+  use HasFactory, HasUuids;
 
-    protected $table = 't_submission_target';
-    protected $fillable = [
-      't_submission_id',
-      'target_type',
-      'target_id',
-      'relation_id',
-      'target_label',
-      'context_json'
-    ];
+  protected $table = 't_submission_target';
+  protected $fillable = [
+    't_submission_id',
+    'target_type',
+    'target_id',
+  ];
 }

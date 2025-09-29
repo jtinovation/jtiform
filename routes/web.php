@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\SuperAppApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-// use App\Http\Controllers\FormController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Global\Form\FormController;
 use App\Http\Controllers\Global\Form\QuestionController;
@@ -22,23 +21,33 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-  Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard')->middleware('auth');
+  Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 
   Route::prefix('form')->group(function () {
-    Route::get('/', [FormController::class, 'index'])->name('form.index');
-    Route::get('/active', [FormController::class, 'showActiveForm'])->name('form.active');
-    Route::get('/create', [FormController::class, 'create'])->name('form.create');
-    Route::post('/store', [FormController::class, 'store'])->name('form.store');
-    Route::get('/{id}', [FormController::class, 'show'])->name('form.show');
-    Route::get('/{id}/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
-    Route::get('/{id}/edit', [FormController::class, 'edit'])->name('form.edit');
-    Route::put('/{id}', [FormController::class, 'update'])->name('form.update');
-    Route::post('/{id}/restore', [FormController::class, 'restore'])->name('form.restore');
-    Route::delete('/{id}', [FormController::class, 'delete'])->name('form.delete');
-    Route::get('/{id}/fill', [FormController::class, 'fillForm'])->name('form.fill');
-    Route::post('/{id}/submit', [FormController::class, 'submitForm'])->name('form.submit');
+    Route::middleware('role:superadmin|admin')->group(function () {
+      Route::get('/', [FormController::class, 'index'])->name('form.index');
+      Route::get('/create', [FormController::class, 'create'])->name('form.create');
+      Route::post('/store', [FormController::class, 'store'])->name('form.store');
+    });
 
-    Route::prefix('/{id}/questions')->group(function () {
+    Route::get('/active', [FormController::class, 'active'])->name('form.active');
+    Route::get('/history', [FormController::class, 'history'])->name('form.history');
+
+    Route::prefix('/{id}')->group(function () {
+      Route::get('/fill', [FormController::class, 'fill'])->name('form.fill');
+      Route::post('/submit', [FormController::class, 'submit'])->name('form.submit');
+      Route::get('/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
+
+      Route::middleware('role:superadmin|admin')->group(function () {
+        Route::get('/', [FormController::class, 'show'])->name('form.show');
+        Route::get('/edit', [FormController::class, 'edit'])->name('form.edit');
+        Route::put('/', [FormController::class, 'update'])->name('form.update');
+        Route::post('/restore', [FormController::class, 'restore'])->name('form.restore');
+        Route::delete('/', [FormController::class, 'delete'])->name('form.delete');
+      });
+    });
+
+    Route::prefix('/{id}/questions')->middleware('role:superadmin|admin')->group(function () {
       Route::get('/', [QuestionController::class, 'index'])->name('form.question.index');
       Route::get('/create', [QuestionController::class, 'create'])->name('form.question.create');
       Route::post('/store', [QuestionController::class, 'store'])->name('form.question.store');

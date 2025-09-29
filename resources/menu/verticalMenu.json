@@ -4,27 +4,52 @@
       "url": "/dashboard",
       "name": "Dashboards",
       "icon": "menu-icon tf-icons ri-home-smile-line",
-      "slug": "home"
+      "slug": "home",
+      "roles": [
+        "superadmin",
+        "admin",
+        "lecturer",
+        "technician",
+        "student"
+      ]
     },
     {
-      "menuHeader": "Forms & Tables"
+      "menuHeader": "Forms Management"
     },
     {
       "url": "/form/active",
-      "name": "Form",
+      "name": "Form Aktif",
       "icon": "menu-icon tf-icons ri-radio-button-line",
-      "slug": "form.active"
+      "slug": "form.active",
+      "roles": [
+        "superadmin",
+        "admin",
+        "lecturer",
+        "technician",
+        "student"
+      ]
     },
     {
+      "url": "/form/history",
+      "name": "Riwayat Pengisian",
+      "icon": "menu-icon tf-icons ri-radio-button-line",
+      "slug": "form.history",
+      "roles": [
+        "superadmin",
+        "admin",
+        "lecturer",
+        "technician",
+        "student"
+      ]
+    },
+    {
+      "url": "/form",
       "name": "Form Master",
       "icon": "menu-icon tf-icons ri-box-3-line",
-      "slug": "form",
-      "submenu": [
-        {
-          "url": "/form",
-          "name": "Form",
-          "slug": "form.index"
-        }
+      "slug": "form.index",
+      "roles": [
+        "superadmin",
+        "admin"
       ]
     }
   ]

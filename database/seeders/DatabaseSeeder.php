@@ -19,23 +19,28 @@ class DatabaseSeeder extends Seeder
   /**
    * Seed the application's database.
    */
-  public function run(): void {
-    $this->call([
-      UserSeeder::class,
-    ]);
+  public function run(): void
+  {
+    // $this->call([
+    //   UserSeeder::class,
+    // ]);
 
-    Form::factory(20)->create();
-    FormTargetRule::factory(20)->create();
-    FormTargetList::factory(30)->create();
-    Question::factory(100)->create();
-    QuestionOption::factory(80)->create();
-    Submission::factory(80)->create();
-    SubmissionTarget::factory(25)->create();
-    Answer::factory(80)->create();
-    AnswerOption::factory(40)->create();
+    // Form::factory(20)->create();
+    // FormTargetRule::factory(20)->create();
+    // FormTargetList::factory(30)->create();
+    // Question::factory(100)->create();
+    // QuestionOption::factory(80)->create();
+    // Submission::factory(80)->create();
+    // SubmissionTarget::factory(25)->create();
+    // Answer::factory(80)->create();
+    // AnswerOption::factory(40)->create();
+
+    // $this->call([
+    //   TestDataSeeder::class
+    // ]);
 
     $this->call([
-      TestDataSeeder::class
+      FormSeeder::class
     ]);
   }
 }

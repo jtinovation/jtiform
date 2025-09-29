@@ -8,15 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Answer extends Model
 {
-    use HasFactory, HasUuids;
+  use HasFactory, HasUuids;
 
-    protected $table = 't_answer';
-    protected $fillable = [
-      't_submission_target_id',
-      'm_question_id',
-      'text_value',
-      'm_question_option_id',
-      'score',
-      'checked_at'
-    ];
+  protected $table = 't_answer';
+  protected $fillable = [
+    't_submission_target_id',
+    'm_question_id',
+    'text_value',
+    'm_question_option_id',
+    'score',
+    'checked_at'
+  ];
+
+  public function answerOptions()
+  {
+    return $this->hasMany(AnswerOption::class, 't_answer_id', 'id');
+  }
 }

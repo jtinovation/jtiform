@@ -2,19 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ApiHelper;
+use App\Helpers\FormHelper;
+use App\Models\Form;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 
 class HomeController extends Controller
 {
-  // Middleware supaya halaman dashboard hanya bisa diakses kalau user punya JWT
-  // public function __construct()
-  // {
-  //     // $this->middleware('jwt.verify');
-  // }
 
-  // Fungsi utama untuk menampilkan dashboard
+  protected $apiHelper;
+  protected $formHelper;
+
+  public function __construct(ApiHelper $apiHelper, FormHelper $formHelper)
+  {
+    $this->apiHelper = $apiHelper;
+    $this->formHelper = $formHelper;
+  }
+
+
   public function index()
   {
-    return view('content.dashboard.dashboard-main');
+    $user = $this->apiHelper->getMe(Auth::user()->token);
+
+    $prefiltered = $this->formHelper->getFormVisibleToUser($user, null, false);
+
+    return view('content.dashboard.dashboard-main', [
+      'user'       => $user,
+      'activeForm' => $prefiltered,
+    ]);
   }
 }

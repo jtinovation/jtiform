@@ -1,9 +1,19 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Form')
+@section('title', 'Riwayat Pengisian Form')
 
 @section('page-script')
-    @vite('resources/assets/js/index-forms.js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $('#search').on('keyup', function() {
+                let debounceTimer;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function() {
+                    $('#form-filter').submit();
+                }, 1000);
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -12,13 +22,13 @@
             <li class="breadcrumb-item">
                 <a href="{{ route('dashboard') }}">Dashboard</a>
             </li>
-            <li class="breadcrumb-item active">Form</li>
+            <li class="breadcrumb-item active">Riwayat Pengisian Form</li>
         </ol>
     </nav>
     <div class="card">
         <div class="row g-2 align-items-center my-3 mx-1">
             <div class="col-12 col-md">
-                <form action="{{ route('form.active') }}" method="GET" id="form-filter">
+                <form action="{{ route('form.history') }}" method="GET" id="form-filter">
                     <div class="row g-2 justify-content-md-end">
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group input-group-sm">
@@ -43,37 +53,34 @@
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
-                    @foreach ($forms as $index=> $form)
+                    @foreach ($submissions as $index => $submission)
                         <tr>
                             <td>
-                                {{ $forms->firstItem() + $index }}
+                                {{ $submissions->firstItem() + $index }}
                             </td>
                             <td>
-                                {{ $form->code }}
+                                {{ $submission->form->code }}
                             </td>
                             <td>
-                                {{ $form->title }} @if ($form->trashed())
-                                    <span class="badge bg-label-danger">Terhapus</span>
-                                @endif
+                                {{ $submission->form->title }}
                             </td>
                             <td>
-                                {{ $form->type }}
+                                {{ $submission->form->type }}
                             </td>
                             <td>
                                 <div class="dropdown">
-                                  <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
-                                  <div class="dropdown-menu">
-                                    @if($submissionStatus[$form->id])
-                                        <a class="dropdown-item" href="{{route('form.result', ['id' => $form->id])}}"><i class="ri-file-list-2-line me-1"></i>  Hasil Pengerjaan</a>
-                                    @else
-                                        <a class="dropdown-item" href="{{route('form.fill', ['id' => $form->id])}}"><i class="ri-edit-line me-1"></i> Mengerjakan Form</a>
-                                    @endif
-                                  </div>
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                        data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item"
+                                            href="{{ route('form.result', ['id' => $submission->form->id]) }}"><i
+                                                class="ri-edit-line me-1"></i> Lihat Detail</a>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     @endforeach
-                    @if ($forms->isEmpty())
+                    @if ($submissions->isEmpty())
                         <tr>
                             <td colspan="5" class="text-center">No data available</td>
                         </tr>
@@ -82,6 +89,6 @@
             </table>
         </div>
 
-        {{ $forms->links('vendor.pagination.bootstrap-5') }}
+        {{ $submissions->links('vendor.pagination.bootstrap-5') }}
     </div>
 @endsection

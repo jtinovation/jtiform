@@ -19,12 +19,7 @@ return new class extends Migration
         ->cascadeOnDelete();
       $table->string('target_type');
       $table->uuid('target_id')->nullable();
-      $table->uuid('relation_id')->nullable();
-      $table->string('target_label', 256);
-      $table->text('context_json');
       $table->timestamps();
-
-      $table->unique(['t_submission_id', 'target_type', 'target_id', 'relation_id'], 'submission_target_unique_constraint');
     });
   }
 

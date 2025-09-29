@@ -43,7 +43,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('form.active') }}">Form</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('form.history') }}">Form</a></li>
             <li class="breadcrumb-item active">Hasil Pengerjaan</li>
         </ol>
     </nav>
@@ -60,13 +60,13 @@
                                 <p class="mb-0 text-muted">{{ $form->description }}</p>
                             @endif
                             <div class="mt-2 text-muted small">
-                                <div>Mulai mengerjakan: {{ \Carbon\Carbon::parse($submission->started_at)->format('d M Y H:i') }}</div>
-                                <div>Selesai: {{ \Carbon\Carbon::parse($submission->submitted_at)->format('d M Y H:i') }}</div>
+                                <div>Tanggal Submit:
+                                    {{ \Carbon\Carbon::parse($submission->submitted_at)->format('d M Y H:i') }}
+                                </div>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <a href="{{ route('form.active') }}"
-                                class="btn btn-outline-secondary">Kembali</a>
+                            <a href="{{ route('form.active') }}" class="btn btn-outline-secondary">Kembali</a>
                         </div>
                     </div>
                     <div class="mt-3 d-flex flex-wrap gap-2">
@@ -160,17 +160,20 @@
                                             @php
                                                 $isSelected = false;
                                                 if ($q->type === 'option') {
-                                                    $isSelected = ($selectedOptionId == $opt->id);
-                                                } else if ($q->type === 'checkbox') {
+                                                    $isSelected = $selectedOptionId == $opt->id;
+                                                } elseif ($q->type === 'checkbox') {
                                                     $isSelected = in_array($opt->id, $selectedOptionIds);
                                                 }
                                             @endphp
-                                            <div class="list-group-item d-flex align-items-center gap-2 {{ $isSelected ? 'list-group-item-selected' : '' }}">
+                                            <div
+                                                class="list-group-item d-flex align-items-center gap-2 {{ $isSelected ? 'list-group-item-selected' : '' }}">
                                                 <span class="text-muted small opt-seq">{{ $j + 1 }}</span>
                                                 @if ($q->type === 'checkbox')
-                                                    <i class="bx {{ $isSelected ? 'bx-check-square text-primary' : 'bx-square' }} me-2"></i>
+                                                    <i
+                                                        class="bx {{ $isSelected ? 'bx-check-square text-primary' : 'bx-square' }} me-2"></i>
                                                 @else
-                                                    <i class="bx {{ $isSelected ? 'bx-radio-circle-marked text-primary' : 'bx-radio-circle' }} me-2"></i>
+                                                    <i
+                                                        class="bx {{ $isSelected ? 'bx-radio-circle-marked text-primary' : 'bx-radio-circle' }} me-2"></i>
                                                 @endif
                                                 <div class="flex-grow-1">
                                                     {{ $opt->answer }}
@@ -179,7 +182,8 @@
                                                     @endif
                                                 </div>
                                                 <div class="col-2">
-                                                    <span class="badge {{ $isSelected ? 'bg-primary' : 'bg-label-primary' }} w-100 text-start">
+                                                    <span
+                                                        class="badge {{ $isSelected ? 'bg-primary' : 'bg-label-primary' }} w-100 text-start">
                                                         Point: {{ (int) $opt->point }}
                                                     </span>
                                                 </div>

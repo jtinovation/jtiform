@@ -39,21 +39,17 @@ class StoreFormRequest extends FormRequest
       'cover'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // KB
       'responden_type' => ['required', Rule::in(FormRespondentTypeEnum::toArray())],
       'major_id' => [
-        Rule::requiredIf($this->input('responden_type') === FormRespondentTypeEnum::MAJOR->value),
+        'nullable',
         'string',
         'uuid'
       ],
       'study_program_id' => [
-        Rule::requiredIf($this->input('responden_type') === FormRespondentTypeEnum::STUDY_PROGRAM->value),
+        'nullable',
         'string',
         'uuid'
       ],
       'respondent_ids' => [
-        Rule::requiredIf(in_array($this->input('responden_type'), [
-          FormRespondentTypeEnum::LECTURER->value,
-          FormRespondentTypeEnum::EDUCATIONAL_STAFF->value,
-          FormRespondentTypeEnum::STUDENT->value
-        ])),
+        'nullable',
         'array'
       ],
       'respondent_ids.*' => [
@@ -82,13 +78,10 @@ class StoreFormRequest extends FormRequest
       'cover.max'              => 'Ukuran gambar maksimal 2MB.',
       'responden_type.required' => 'Tipe responden wajib diisi.',
       'responden_type.in'      => 'Tipe responden tidak valid.',
-      'major_id.required'      => 'Jurusan wajib diisi jika tipe responden adalah jurusan.',
       'major_id.string'        => 'Jurusan tidak valid.',
       'major_id.uuid'          => 'Jurusan tidak valid.',
-      'study_program_id.required' => 'Program studi wajib diisi jika tipe responden adalah program studi.',
       'study_program_id.string'   => 'Program studi tidak valid.',
       'study_program_id.uuid'     => 'Program studi tidak valid.',
-      'respondent_ids.required'   => 'Daftar responden wajib diisi untuk tipe responden terpilih.',
       'respondent_ids.array'      => 'Daftar responden tidak valid.',
       'respondent_ids.*.string'   => 'Responden tidak valid.',
       'respondent_ids.*.uuid'     => 'Responden tidak valid.',

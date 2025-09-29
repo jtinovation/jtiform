@@ -58,7 +58,7 @@ class SuperAppApiController extends Controller
     $studentsAsLabelValue = array_map(function ($student) {
       return [
         'label' => $student['nim'] . ' - ' . $student['name'],
-        'value' => $student['id']
+        'value' => $student['user_id']
       ];
     }, $response->json()['data']);
 
@@ -89,7 +89,7 @@ class SuperAppApiController extends Controller
     $employeesAsLabelValue = array_map(function ($employee) {
       return [
         'label' => $employee['nip'] . ' - ' . $employee['name'],
-        'value' => $employee['id']
+        'value' => $employee['user_id']
       ];
     }, $response->json()['data']);
 

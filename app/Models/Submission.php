@@ -9,17 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Submission extends Model
 {
-    use HasFactory, HasUuids;
+  use HasFactory, HasUuids;
 
-    protected $table = 't_submission';
-    protected $fillable = [
-      'm_form_id',
-      'm_user_id',
-      'started_at',
-      'submitted_at',
-      'status',
-      'is_anonymous',
-      'is_valid',
-      'meta_json'
-    ];
+  protected $table = 't_submission';
+  protected $fillable = [
+    'm_form_id',
+    'm_user_id',
+    'submitted_at',
+    'is_valid',
+  ];
+
+  public function form()
+  {
+    return $this->belongsTo(Form::class, 'm_form_id');
+  }
 }

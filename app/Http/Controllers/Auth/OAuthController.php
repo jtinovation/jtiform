@@ -50,8 +50,8 @@ class OAuthController extends Controller
         'name' => $dto->user->name,
         'email' => $dto->user->email,
         'token' => $dto->token,
-        'roles' => $dto->user->roles ? json_encode($dto->user->roles) : null,
-        'permissions' => $dto->user->permissions ? json_encode($dto->user->permissions) : null,
+        'roles' => $dto->user->roles ? $dto->user->roles : null,
+        'permissions' => $dto->user->permissions ? $dto->user->permissions : null,
       ]
     );
 

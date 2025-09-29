@@ -28,6 +28,7 @@ class Form extends Model
   ];
 
   protected $casts = [
+    'respondents' => 'array',
     'start_at' => 'datetime',
     'end_at'   => 'datetime',
   ];
@@ -35,5 +36,10 @@ class Form extends Model
   public function questions()
   {
     return $this->hasMany(Question::class, 'm_form_id', 'id');
+  }
+
+  public function submissions()
+  {
+    return $this->hasMany(Submission::class, 'm_form_id', 'id');
   }
 }
