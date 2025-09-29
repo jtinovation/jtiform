@@ -461,7 +461,6 @@ class FormController extends Controller
         ->with('success', 'Jawaban berhasil dikirim. Terima kasih!');
     } catch (\Throwable $e) {
       DB::rollBack();
-      dd($e);
       report($e);
 
       return back()
