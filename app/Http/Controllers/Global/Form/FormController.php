@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Global\Form;
 
 use App\Enums\FormRespondentTypeEnum;
+use App\Enums\FormTypeEnum;
 use App\Helpers\ApiHelper;
 use App\Helpers\FileHelper;
 use App\Helpers\FormHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Global\Form\StoreFormRequest;
+use App\Http\Requests\Global\Form\UpdateFormRequest;
 use App\Models\Answer;
 use App\Models\AnswerOption;
 use Illuminate\Http\Request;
@@ -17,7 +19,9 @@ use App\Models\Question;
 use App\Models\Submission;
 use App\Models\SubmissionTarget;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -60,47 +64,7 @@ class FormController extends Controller
   {
     $validated = $request->validated();
 
-    $respondents = [
-      'type' => $validated['responden_type'],
-    ];
-
-    switch ($validated['responden_type']) {
-      case FormRespondentTypeEnum::ALL->value:
-        break;
-
-      case FormRespondentTypeEnum::MAJOR->value:
-        $respondents['major_id'] = $validated['major_id'];
-        break;
-
-      case FormRespondentTypeEnum::STUDY_PROGRAM->value:
-        $respondents['major_id'] = $validated['major_id'];
-        $respondents['study_program_id'] = $validated['study_program_id'];
-        break;
-
-      default:
-        $hasMajor = isset($validated['major_id']) && $validated['major_id'];
-        $hasStudy = isset($validated['study_program_id']);
-        $hasIds   = isset($validated['respondent_ids']);
-
-        if ($hasIds && $hasStudy && $hasMajor) {
-          $respondents += [
-            'major_id'         => $validated['major_id'],
-            'study_program_id' => $validated['study_program_id'],
-            'respondent_ids'   => $validated['respondent_ids'],
-          ];
-        } elseif ($hasStudy && $hasMajor) {
-          $respondents += [
-            'major_id'         => $validated['major_id'],
-            'study_program_id' => $validated['study_program_id'],
-          ];
-        } elseif ($hasMajor) {
-          $respondents['major_id'] = $validated['major_id'];
-        } else {
-          $respondents['respondent_ids'] = $validated['respondent_ids'];
-        }
-        break;
-    }
-
+    $respondents = FormHelper::getRespondentIds($validated);
 
     if ($request->hasFile('cover')) {
       $validated['cover_file'] = FileHelper::storeFile($request->file('cover'), '/form');
@@ -139,10 +103,12 @@ class FormController extends Controller
     return view('content.form.edit', compact('form'));
   }
 
-  public function update(StoreFormRequest $request, $id)
+  public function update(UpdateFormRequest $request, $id)
   {
     $form = Form::withTrashed()->findOrFail($id);
     $validated = $request->validated();
+
+    $respondents = FormHelper::getRespondentIds($validated);
 
     if ($request->hasFile('cover')) {
       // Hapus file lama jika ada
@@ -162,6 +128,7 @@ class FormController extends Controller
       'end_at' => $validated['end_at'],
       'cover_path' => $validated['cover_path'] ?? $form->cover_path,
       'cover_file' => $validated['cover_file'] ?? $form->cover_file,
+      'respondents' => $respondents
     ]);
 
     return redirect()->route('form.index')->with('success', 'Form berhasil diperbarui.');
@@ -256,21 +223,45 @@ class FormController extends Controller
   public function fill($formId)
   {
     $form = Form::findOrFail($formId);
-    $questions = Question::where('m_form_id', $formId)
-      ->with([
-        'options' => function ($query) {
-          $query->orderBy('sequence');
-        }
-      ])
-      ->orderBy('sequence')
-      ->get();
 
-    return view('content.form.fill', compact('form', 'questions'));
+    if ($form->type === FormTypeEnum::GENERAL->value) {
+      $questions = Question::where('m_form_id', $formId)
+        ->with([
+          'options' => function ($query) {
+            $query->orderBy('sequence');
+          }
+        ])
+        ->orderBy('sequence')
+        ->get();
+      return view('content.form.fill', compact('form', 'questions'));
+    } else {
+
+      $user = $this->apiHelper->getMe(Auth::user()->token);
+
+      $activeSemester = collect(Arr::get($user, 'student_detail.student_semester', []))
+        ->first(function ($item) {
+          return Arr::get($item, 'is_active') === true;
+        });
+
+      $lectures = $this->apiHelper->GetLectureOnSubject(
+        Auth::user()->token,
+        Arr::get($user, 'student_detail.m_study_program_id'),
+        Arr::get($activeSemester, 'semester_id')
+      );
+
+      $studyProgramName = Arr::get($user, 'student_detail.study_program_name', 'N/A');
+      $key = "form:choose-lecture:{" . Auth::user()->id . "}:{$formId}";
+      $prefill = [];
+      if ($cached = Redis::get($key)) {
+        $prefill = json_decode($cached, true) ?: [];
+      }
+
+      return view('content.form.choose-lecture', compact('form', 'lectures', 'studyProgramName', 'prefill'));
+    }
   }
 
   public function submit(Request $request, $formId)
   {
-    // Ambil form + pertanyaan + opsi untuk validasi & mapping
     $form = Form::query()
       ->with(['questions' => function ($q) {
         $q->select('id', 'm_form_id', 'type', 'question', 'is_required');
@@ -279,17 +270,15 @@ class FormController extends Controller
       }])
       ->findOrFail($formId);
 
-    $answersInput = $request->input('answer', []); // array: [questionId => value|[values]]
+    $answersInput = $request->input('answer', []);
 
-    // ---- VALIDASI SERVER-SIDE UNTUK PERTANYAAN WAJIB ----
     $errors = [];
 
     foreach ($form->questions as $question) {
       $qid = $question->id;
-      $type = $question->type; // 'text' | 'checkbox' | 'option'
+      $type = $question->type;
       $required = (bool)($question->is_required ?? false);
 
-      // Ambil jawaban user (bisa string, bisa array)
       $value = $answersInput[$qid] ?? null;
 
       if ($required) {
@@ -308,7 +297,6 @@ class FormController extends Controller
         }
       }
 
-      // Untuk pilihan (radio/checkbox), pastikan opsi yang dikirim memang milik pertanyaan tsb
       if (($type === 'option' && !empty($value)) || ($type === 'checkbox' && is_array($value) && !empty($value))) {
         $validOptionIds = $question->options->pluck('id')->all();
 
@@ -316,7 +304,7 @@ class FormController extends Controller
           if (!in_array($value, $validOptionIds, true)) {
             $errors["answer.$qid"] = 'Opsi tidak valid.';
           }
-        } else { // checkbox
+        } else {
           $picked = array_values(array_unique(array_filter((array)$value)));
           $diff = array_diff($picked, $validOptionIds);
           if (!empty($diff)) {
@@ -330,7 +318,6 @@ class FormController extends Controller
       throw ValidationException::withMessages($errors);
     }
 
-    // ---- SIMPAN JAWABAN ----
     try {
       DB::beginTransaction();
 
@@ -338,10 +325,9 @@ class FormController extends Controller
         'm_form_id'    => $form->id,
         'm_user_id'    => Auth::id(),
         'submitted_at' => now(),
-        'is_valid'     => true, // sudah divalidasi di atas
+        'is_valid'     => true,
       ]);
 
-      // NOTE: sementara target_type 'general' seperti contohmu
       $submissionTarget = SubmissionTarget::create([
         't_submission_id' => $submission->id,
         'target_type'     => 'general',
@@ -354,17 +340,14 @@ class FormController extends Controller
         $qid = $question->id;
         $type = $question->type;
 
-        // Jika optional & tidak diisi, lewati
         if (!array_key_exists($qid, $answersInput)) {
           continue;
         }
 
-        // text
         if ($type === 'text') {
           $text = (string)($answersInput[$qid] ?? '');
           $text = trim($text);
 
-          // Kalau kosong dan tidak required, skip
           if ($text === '' && !$question->is_required) {
             continue;
           }
@@ -374,24 +357,21 @@ class FormController extends Controller
             'm_question_id'          => $qid,
             'text_value'             => $text,
             'm_question_option_id'   => null,
-            'score'                  => 0, // text tidak dinilai
+            'score'                  => 0,
             'checked_at'             => $now,
           ]);
 
           continue;
         }
 
-        // radio/option (single)
         if ($type === 'option') {
           $optionId = $answersInput[$qid] ?? null;
           if (!$optionId) {
-            // optional & tidak diisi → skip
             if (!$question->is_required) {
               continue;
             }
           }
 
-          // Ambil point
           $opt = $question->options->firstWhere('id', $optionId);
           $point = $opt?->point ?? 0;
 
@@ -407,18 +387,15 @@ class FormController extends Controller
           continue;
         }
 
-        // checkbox (multiple)
         if ($type === 'checkbox') {
           $picked = array_values(array_unique(array_filter((array)($answersInput[$qid] ?? []))));
 
           if (empty($picked)) {
-            // optional & tidak diisi → skip
             if (!$question->is_required) {
               continue;
             }
           }
 
-          // Hitung total point dari semua opsi terpilih
           $optPoints = $question->options
             ->whereIn('id', $picked)
             ->pluck('point')
@@ -426,17 +403,15 @@ class FormController extends Controller
 
           $totalPoint = array_sum($optPoints);
 
-          // Buat satu baris t_answer, detail opsi disimpan di t_answer_option
           $answer = Answer::create([
             't_submission_target_id' => $submissionTarget->id,
             'm_question_id'          => $qid,
             'text_value'             => null,
-            'm_question_option_id'   => null, // pakai detail di t_answer_option
+            'm_question_option_id'   => null,
             'score'                  => $totalPoint,
             'checked_at'             => $now,
           ]);
 
-          // Insert t_answer_option untuk setiap pilihan
           $rows = [];
           $ts = now();
           foreach ($picked as $oid) {
@@ -467,5 +442,484 @@ class FormController extends Controller
         ->withInput()
         ->with('error', 'Terjadi kesalahan saat menyimpan jawaban. Silakan coba lagi.');
     }
+  }
+
+  public function storeChosenLectures(Request $request, $formId)
+  {
+    $request->validate([
+      'selections' => 'required|array',         // selections[subject_id] = [lecture_id, ...]
+    ]);
+
+    // Validasi server: tiap subject minimal 1 dosen
+    foreach ($request->input('selections') as $subjectId => $lectureIds) {
+      if (!is_array($lectureIds) || count($lectureIds) < 1) {
+        return back()->with('error', 'Setiap mata kuliah harus dipilihkan minimal satu dosen.')->withInput();
+      }
+    }
+
+    // Simpan sementara di Redis (24 jam)
+    $key = "form:choose-lecture:{" . Auth::user()->id . "}:{$formId}";
+    Redis::setex($key, 60 * 60 * 24, json_encode($request->input('selections')));
+
+    return redirect()
+      ->route('form.fill.lecture', $formId) // atau ke langkah berikutnya
+      ->with('success', 'Pilihan dosen berhasil disimpan sementara.');
+  }
+
+  public function fillLecture($formId)
+  {
+    $form = Form::findOrFail($formId);
+
+    $questions = Question::where('m_form_id', $formId)
+      ->with([
+        'options' => function ($query) {
+          $query->orderBy('sequence');
+        }
+      ])
+      ->orderBy('sequence')
+      ->get();
+
+    $key = "form:choose-lecture:{" . Auth::user()->id . "}:{$formId}";
+    $choosenLectures = [];
+    if ($cached = Redis::get($key)) {
+      $choosenLectures = json_decode($cached, true) ?: [];
+    }
+
+    $user = $this->apiHelper->getMe(Auth::user()->token);
+
+    $activeSemester = collect(Arr::get($user, 'student_detail.student_semester', []))
+      ->first(function ($item) {
+        return Arr::get($item, 'is_active') === true;
+      });
+
+    $lectures = $this->apiHelper->GetLectureOnSubject(
+      Auth::user()->token,
+      Arr::get($user, 'student_detail.m_study_program_id'),
+      Arr::get($activeSemester, 'semester_id')
+    );
+
+    $selectedLecturesWithDetail = [];
+
+    foreach ($lectures as $subjectData) {
+      $subjectId = $subjectData['subject']['id'];
+      if (isset($choosenLectures[$subjectId])) {
+        $selectedIds = $choosenLectures[$subjectId];
+
+        $filteredLecturers = array_filter(
+          $subjectData['lectures'],
+          function ($lecturer) use ($selectedIds) {
+            return in_array($lecturer['id'], $selectedIds);
+          }
+        );
+
+        $subjectResult = $subjectData;
+        $subjectResult['lectures'] = array_values($filteredLecturers);
+        $selectedLecturesWithDetail[] = $subjectResult;
+      }
+    }
+
+    return view('content.form.fill-evaluation', compact('form', 'questions', 'selectedLecturesWithDetail'));
+  }
+
+  public function submitEvaluation(Request $request, $formId)
+  {
+    $form = Form::with(['questions' => function ($q) {
+      $q->orderBy('sequence')->with(['options' => function ($o) {
+        $o->orderBy('sequence');
+      }]);
+    }])->findOrFail($formId);
+
+    // Payload dari form (Blade sebelumnya)
+    $answersInput = $request->input('answers', []); // answers[subject_id][subject_lecture_id][question_id] = ...
+    $targets      = $request->input('targets', []); // targets[subject_id][] = subject_lecture_id
+
+    if (empty($answersInput) || empty($targets)) {
+      return back()->withErrors(['answers' => 'Tidak ada jawaban atau target yang dikirim.'])->withInput();
+    }
+
+    // 1) Ambil pilihan dari Redis (ISINYA lecturer_id per subject)
+    $redisKey = "form:choose-lecture:{" . Auth::id() . "}:{$formId}";
+    $chosen = [];
+    if ($cached = Redis::get($redisKey)) {
+      $chosen = json_decode($cached, true) ?: [];
+    }
+
+    // 2) Bangun peta allowed subject_lecture_id dari API
+    $user = $this->apiHelper->getMe(Auth::user()->token);
+    $activeSemester = collect(Arr::get($user, 'student_detail.student_semester', []))
+      ->first(fn($item) => Arr::get($item, 'is_active') === true);
+
+    $lectures = $this->apiHelper->GetLectureOnSubject(
+      Auth::user()->token,
+      Arr::get($user, 'student_detail.m_study_program_id'),
+      Arr::get($activeSemester, 'semester_id')
+    );
+
+    // subject_id => [allowed subject_lecture_id ...] (diturunkan dari lecturer_id yang tersimpan di Redis)
+    $allowedBySubject = [];
+    foreach ($lectures as $subjectData) {
+      $subjectId = Arr::get($subjectData, 'subject.id');
+      if (!$subjectId) continue;
+
+      $allowedLecturerIds = (array) Arr::get($chosen, $subjectId, []);
+      if (empty($allowedLecturerIds)) continue;
+
+      foreach ((array) Arr::get($subjectData, 'lectures', []) as $lec) {
+        $lecId = Arr::get($lec, 'id'); // lecturer_id
+        $slid  = Arr::get($lec, 'subject_lecture_id') ?? ($lecId . '_' . $subjectId); // fallback
+        if (in_array($lecId, $allowedLecturerIds, true)) {
+          $allowedBySubject[$subjectId][] = $slid;
+        }
+      }
+    }
+
+    // 3) VALIDASI: target yang dikirim user harus termasuk allowed subject_lecture_id
+    foreach ($targets as $subjectId => $slids) {
+      $slids   = (array) $slids;
+      $allowed = (array) Arr::get($allowedBySubject, $subjectId, []);
+      foreach ($slids as $slid) {
+        if (!in_array($slid, $allowed, true)) {
+          return back()->withErrors(['targets' => 'Terdapat target yang tidak valid untuk mata kuliah terkait.'])->withInput();
+        }
+      }
+    }
+
+    // 4) VALIDASI: pertanyaan wajib per target (radio/text/checkbox)
+    // Siapkan index opsi per pertanyaan untuk validasi id & ambil point
+    $optionsIndex = [];
+    foreach ($form->questions as $q) {
+      $optionsIndex[$q->id] = $q->options->keyBy('id'); // id => Option model (punya kolom 'point')
+    }
+
+    $errors = [];
+    foreach ($targets as $subjectId => $slids) {
+      foreach ((array) $slids as $slid) {
+        foreach ($form->questions as $q) {
+          if (!$q->is_required) continue;
+
+          $val = Arr::get($answersInput, "{$subjectId}.{$slid}.{$q->id}");
+
+          if ($q->type === 'text') {
+            if (!is_string($val) || trim($val) === '') {
+              $errors["answers.{$subjectId}.{$slid}.{$q->id}"] = 'Pertanyaan wajib (teks) belum diisi.';
+            }
+          } elseif ($q->type === 'option') {
+            $optId = $val;
+            if (!$optId || !isset($optionsIndex[$q->id][$optId])) {
+              $errors["answers.{$subjectId}.{$slid}.{$q->id}"] = 'Pilih salah satu opsi untuk pertanyaan wajib.';
+            }
+          } elseif ($q->type === 'checkbox') {
+            $picked = array_values(array_unique(array_filter((array) $val)));
+            if (empty($picked)) {
+              $errors["answers.{$subjectId}.{$slid}.{$q->id}"] = 'Pilih minimal satu opsi untuk pertanyaan wajib.';
+            } else {
+              foreach ($picked as $oid) {
+                if (!isset($optionsIndex[$q->id][$oid])) {
+                  $errors["answers.{$subjectId}.{$slid}.{$q->id}"] = 'Terdapat opsi tidak valid.';
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (!empty($errors)) {
+      return back()->withErrors($errors)->withInput();
+    }
+
+    // 5) SIMPAN (mengikuti pola "general" milikmu, tapi multi-target)
+    try {
+      DB::beginTransaction();
+
+      $submission = Submission::create([
+        'm_form_id'    => $form->id,
+        'm_user_id'    => Auth::id(),
+        'submitted_at' => now(),
+        'is_valid'     => true,
+      ]);
+
+      $now = now();
+
+      foreach ($targets as $subjectId => $slids) {
+        foreach ((array) $slids as $slid) {
+          // tiap subject_lecture_id = satu target
+          $submissionTarget = SubmissionTarget::create([
+            't_submission_id' => $submission->id,
+            'target_type'     => 'subject_lecture',
+            'target_id'       => $slid,
+          ]);
+
+          // simpan semua pertanyaan untuk target ini
+          foreach ($form->questions as $question) {
+            $qid  = $question->id;
+            $type = $question->type;
+
+            if (!array_key_exists($qid, Arr::get($answersInput, "{$subjectId}.{$slid}", []))) {
+              // skip jika tidak ada input & tidak required
+              if (!$question->is_required) {
+                continue;
+              }
+            }
+
+            if ($type === 'text') {
+              $text = (string) (Arr::get($answersInput, "{$subjectId}.{$slid}.{$qid}") ?? '');
+              $text = trim($text);
+
+              if ($text === '' && !$question->is_required) {
+                continue;
+              }
+
+              Answer::create([
+                't_submission_target_id' => $submissionTarget->id,
+                'm_question_id'          => $qid,
+                'text_value'             => $text,
+                'm_question_option_id'   => null,
+                'score'                  => 0,
+                'checked_at'             => $now,
+              ]);
+              continue;
+            }
+
+            if ($type === 'option') {
+              $optionId = Arr::get($answersInput, "{$subjectId}.{$slid}.{$qid}");
+              if (!$optionId) {
+                if (!$question->is_required) continue;
+              }
+
+              // validasi aman karena sudah diverifikasi di atas
+              $point = optional($optionsIndex[$qid][$optionId] ?? null)->point ?? 0;
+
+              Answer::create([
+                't_submission_target_id' => $submissionTarget->id,
+                'm_question_id'          => $qid,
+                'text_value'             => null,
+                'm_question_option_id'   => $optionId,
+                'score'                  => $point,
+                'checked_at'             => $now,
+              ]);
+              continue;
+            }
+
+            if ($type === 'checkbox') {
+              $picked = array_values(array_unique(array_filter(
+                (array) Arr::get($answersInput, "{$subjectId}.{$slid}.{$qid}", [])
+              )));
+
+              if (empty($picked)) {
+                if (!$question->is_required) continue;
+              }
+
+              // hitung total score checkbox
+              $totalPoint = 0;
+              foreach ($picked as $oid) {
+                $totalPoint += optional($optionsIndex[$qid][$oid] ?? null)->point ?? 0;
+              }
+
+              $answer = Answer::create([
+                't_submission_target_id' => $submissionTarget->id,
+                'm_question_id'          => $qid,
+                'text_value'             => null,
+                'm_question_option_id'   => null,
+                'score'                  => $totalPoint,
+                'checked_at'             => $now,
+              ]);
+
+              if (!empty($picked)) {
+                $ts = now();
+                $rows = [];
+                foreach ($picked as $oid) {
+                  $rows[] = [
+                    'id'                   => Str::uuid()->toString(),
+                    't_answer_id'          => $answer->id,
+                    'm_question_option_id' => $oid,
+                    'created_at'           => $ts,
+                    'updated_at'           => $ts,
+                  ];
+                }
+                AnswerOption::insert($rows);
+              }
+            }
+          } // end foreach questions
+        } // end foreach slids
+      } // end foreach subjects
+
+      DB::commit();
+
+      // bersihkan cache pilihan
+      Redis::del($redisKey);
+
+      return redirect()
+        ->route('form.history', $form->id) // samakan dengan flow "general" milikmu
+        ->with('success', 'Jawaban berhasil dikirim. Terima kasih!');
+    } catch (\Throwable $e) {
+      DB::rollBack();
+      report($e);
+
+      return back()
+        ->withInput()
+        ->with('error', 'Terjadi kesalahan saat menyimpan jawaban. Silakan coba lagi.');
+    }
+  }
+
+  public function showEvaluationResult($formId)
+  {
+    $user = Auth::user();
+    $form = Form::findOrFail($formId);
+
+    // Ambil pertanyaan + opsi untuk render
+    $questions = Question::where('m_form_id', $formId)
+      ->with(['options' => fn($q) => $q->orderBy('sequence')])
+      ->orderBy('sequence')
+      ->get();
+
+    // Submission user untuk form ini
+    $submission = Submission::where('m_form_id', $formId)
+      ->where('m_user_id', $user->id)
+      ->first();
+
+    if (!$submission) {
+      return redirect()->back()->with('error', 'Anda belum mengerjakan form ini.');
+    }
+
+    // Ambil semua target subject_lecture pada submission ini
+    $targets = SubmissionTarget::where('t_submission_id', $submission->id)
+      ->where('target_type', 'subject_lecture')
+      ->get();
+
+    if ($targets->isEmpty()) {
+      // fallback: mungkin ini bukan tipe evaluasi dosen
+      return redirect()->back()->with('error', 'Tidak ada target evaluasi dosen pada form ini.');
+    }
+
+    // Map: submission_target_id => jawaban (with answerOptions)
+    $answersByTarget = Answer::with('answerOptions')
+      ->whereIn('t_submission_target_id', $targets->pluck('id'))
+      ->get()
+      ->groupBy('t_submission_target_id');
+
+    /**
+     * Kita butuh nama matkul & nama dosen dari subject_lecture_id.
+     * Ambil dari API yang sama seperti saat pengisian.
+     */
+    $me = $this->apiHelper->getMe($user->token);
+    $activeSemester = collect(Arr::get($me, 'student_detail.student_semester', []))
+      ->first(fn($item) => Arr::get($item, 'is_active') === true);
+
+    $apiLectures = $this->apiHelper->GetLectureOnSubject(
+      $user->token,
+      Arr::get($me, 'student_detail.m_study_program_id'),
+      Arr::get($activeSemester, 'semester_id')
+    );
+
+    // Build map: subject_lecture_id -> meta (subject_id/name/code, lecturer_name)
+    $slMeta = [];                 // slid => ['subject_id','subject_name','subject_code','lecturer_name']
+    $subjectMeta = [];            // subject_id => ['id','name','code']
+    foreach ($apiLectures as $s) {
+      $sid   = Arr::get($s, 'subject.id');
+      $sname = Arr::get($s, 'subject.name');
+      $scode = Arr::get($s, 'subject.code');
+      if ($sid) {
+        $subjectMeta[$sid] = ['id' => $sid, 'name' => $sname, 'code' => $scode];
+        foreach ((array) Arr::get($s, 'lectures', []) as $lec) {
+          $lecName = Arr::get($lec, 'user.name', 'Nama Dosen');
+          $lecId   = Arr::get($lec, 'id');
+          $slid    = Arr::get($lec, 'subject_lecture_id') ?? ($lecId . '_' . $sid);
+          $slMeta[$slid] = [
+            'subject_id'   => $sid,
+            'subject_name' => $sname,
+            'subject_code' => $scode,
+            'lecturer_name' => $lecName,
+          ];
+        }
+      }
+    }
+
+    /**
+     * Bentuk struktur untuk view:
+     * $subjectsView = [
+     *   [
+     *     'subject' => ['id','name','code'],
+     *     'lectures' => [
+     *       [
+     *         'subject_lecture_id' => '...',
+     *         'lecturer_name' => '...',
+     *         'answers_by_qid' => [ qid => ['type','text','sel_id','sel_ids','score'] ],
+     *       ],
+     *     ],
+     *   ],
+     * ]
+     */
+    $bySubject = []; // subject_id => ['subject'=>..., 'lectures'=>[...]]
+    foreach ($targets as $t) {
+      $slid = $t->target_id;
+      $meta = $slMeta[$slid] ?? null;
+
+      // Jika meta tidak ketemu (misal data API berubah), kasih placeholder
+      $sid     = $meta['subject_id']   ?? 'unknown_' . $slid;
+      $sname   = $meta['subject_name'] ?? 'Mata Kuliah (tidak tersedia)';
+      $scode   = $meta['subject_code'] ?? '—';
+      $lecName = $meta['lecturer_name'] ?? 'Dosen (tidak tersedia)';
+
+      if (!isset($bySubject[$sid])) {
+        $bySubject[$sid] = [
+          'subject'  => ['id' => $sid, 'name' => $sname, 'code' => $scode],
+          'lectures' => [],
+        ];
+      }
+
+      // Kumpulkan jawaban per-pertanyaan untuk target ini
+      $ansCol = $answersByTarget->get($t->id, collect());
+      $byQ = []; // qid => data
+      foreach ($ansCol as $ans) {
+        $qid = $ans->m_question_id;
+        if (!isset($byQ[$qid])) {
+          $byQ[$qid] = [
+            'type'   => null,
+            'text'   => null,
+            'sel_id' => null,    // untuk radio/option
+            'sel_ids' => [],      // untuk checkbox
+            'score'  => (int) $ans->score,
+          ];
+        }
+        // tipe kita ambil dari master $questions
+        $byQ[$qid]['type'] = optional($questions->firstWhere('id', $qid))->type;
+
+        if (!is_null($ans->text_value)) {
+          $byQ[$qid]['text'] = $ans->text_value;
+        }
+        if (!is_null($ans->m_question_option_id)) {
+          // radio
+          $byQ[$qid]['sel_id'] = $ans->m_question_option_id;
+        }
+        if ($ans->relationLoaded('answerOptions') && $ans->answerOptions) {
+          foreach ($ans->answerOptions as $ao) {
+            $byQ[$qid]['sel_ids'][] = $ao->m_question_option_id;
+          }
+        }
+      }
+      // unikkan sel_ids
+      foreach ($byQ as &$row) {
+        $row['sel_ids'] = array_values(array_unique($row['sel_ids']));
+      }
+
+      $bySubject[$sid]['lectures'][] = [
+        'subject_lecture_id' => $slid,
+        'lecturer_name'      => $lecName,
+        'answers_by_qid'     => $byQ,
+      ];
+    }
+
+    // Urutkan by subject name
+    $subjectsView = array_values($bySubject);
+    usort($subjectsView, fn($a, $b) => strcmp($a['subject']['name'], $b['subject']['name']));
+
+    return view('content.form.detail-evaluation', [
+      'form'          => $form,
+      'questions'     => $questions,
+      'submission'    => $submission,
+      'subjectsView'  => $subjectsView,
+    ]);
   }
 }

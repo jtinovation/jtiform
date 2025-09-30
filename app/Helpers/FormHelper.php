@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\FormRespondentTypeEnum;
 use App\Models\Form;
 use Illuminate\Support\Arr;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -205,5 +206,51 @@ class FormHelper
     // })->values();
 
     return $prefiltered;
+  }
+
+  public static function getRespondentIds(array $validated): array
+  {
+    $respondents = [
+      'type' => $validated['responden_type'],
+    ];
+
+    switch ($validated['responden_type']) {
+      case FormRespondentTypeEnum::ALL->value:
+        break;
+
+      case FormRespondentTypeEnum::MAJOR->value:
+        $respondents['major_id'] = $validated['major_id'];
+        break;
+
+      case FormRespondentTypeEnum::STUDY_PROGRAM->value:
+        $respondents['major_id'] = $validated['major_id'];
+        $respondents['study_program_id'] = $validated['study_program_id'];
+        break;
+
+      default:
+        $hasMajor = isset($validated['major_id']) && $validated['major_id'];
+        $hasStudy = isset($validated['study_program_id']);
+        $hasIds   = isset($validated['respondent_ids']);
+
+        if ($hasIds && $hasStudy && $hasMajor) {
+          $respondents += [
+            'major_id'         => $validated['major_id'],
+            'study_program_id' => $validated['study_program_id'],
+            'respondent_ids'   => $validated['respondent_ids'],
+          ];
+        } elseif ($hasStudy && $hasMajor) {
+          $respondents += [
+            'major_id'         => $validated['major_id'],
+            'study_program_id' => $validated['study_program_id'],
+          ];
+        } elseif ($hasMajor) {
+          $respondents['major_id'] = $validated['major_id'];
+        } else {
+          $respondents['respondent_ids'] = $validated['respondent_ids'];
+        }
+        break;
+    }
+
+    return $respondents;
   }
 }

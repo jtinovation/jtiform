@@ -236,6 +236,7 @@
             // =======================
             // Elemen
             // =======================
+            const $formType = $('#type');
             const $type = $('#responden_type');
             const $major = $('#major_id');
             const $prodi = $('#study_program_id');
@@ -398,6 +399,24 @@
             // =======================
             // Events
             // =======================
+            $formType.on('change', function() {
+                const val = $(this).val();
+                if (val === '{{ FormTypeEnum::LECTURE_EVALUATION->value }}') {
+                    // kalau ganti ke evaluasi dosen, set responden ke mahasiswa
+                    $type.val('{{ FormRespondentTypeEnum::STUDENT->value }}').trigger('change');
+                    // disable pilihan lain
+                    $type.find('option').each(function() {
+                        const v = $(this).val();
+                        if (v !== '{{ FormRespondentTypeEnum::STUDENT->value }}') {
+                            $(this).prop('disabled', true);
+                        }
+                    });
+                } else {
+                    // enable semua pilihan
+                    $type.find('option').prop('disabled', false);
+                }
+            });
+
             $type.on('change', async function() {
                 const val = $(this).val();
 

@@ -35,8 +35,12 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('/{id}')->group(function () {
       Route::get('/fill', [FormController::class, 'fill'])->name('form.fill');
+      Route::post('/choose-lecture', [FormController::class, 'storeChosenLectures'])->name('form.choose-lecture.store');
+      Route::get('/fill-lecture', [FormController::class, 'fillLecture'])->name('form.fill.lecture');
       Route::post('/submit', [FormController::class, 'submit'])->name('form.submit');
+      Route::post('/submit-evaluation', [FormController::class, 'submitEvaluation'])->name('form.submit.evaluation');
       Route::get('/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
+      Route::get('/result-evaluation', [FormController::class, 'showEvaluationResult'])->name('form.detail');
 
       Route::middleware('role:superadmin|admin')->group(function () {
         Route::get('/', [FormController::class, 'show'])->name('form.show');
