@@ -2,6 +2,10 @@
 
 @section('title', 'Riwayat Pengisian Form')
 
+@php
+    use App\Enums\FormTypeEnum;
+@endphp
+
 @section('page-script')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -72,9 +76,15 @@
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
                                         data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item"
-                                            href="{{ route('form.result', ['id' => $submission->form->id]) }}"><i
-                                                class="ri-edit-line me-1"></i> Lihat Detail</a>
+                                        @if ($submission->form->type === FormTypeEnum::GENERAL->value)
+                                            <a class="dropdown-item"
+                                                href="{{ route('form.result', ['id' => $submission->form->id]) }}"><i
+                                                    class="ri-edit-line me-1"></i> Lihat Detail</a>
+                                        @else
+                                            <a class="dropdown-item"
+                                                href="{{ route('form.result.evaluation', ['id' => $submission->form->id]) }}"><i
+                                                    class="ri-edit-line me-1"></i> Lihat Detail</a>
+                                        @endif
                                     </div>
                                 </div>
                             </td>

@@ -40,7 +40,7 @@ Route::middleware('auth')->group(function () {
       Route::post('/submit', [FormController::class, 'submit'])->name('form.submit');
       Route::post('/submit-evaluation', [FormController::class, 'submitEvaluation'])->name('form.submit.evaluation');
       Route::get('/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
-      Route::get('/result-evaluation', [FormController::class, 'showEvaluationResult'])->name('form.detail');
+      Route::get('/result-evaluation', [FormController::class, 'showEvaluationResult'])->name('form.result.evaluation');
 
       Route::middleware('role:superadmin|admin')->group(function () {
         Route::get('/', [FormController::class, 'show'])->name('form.show');
