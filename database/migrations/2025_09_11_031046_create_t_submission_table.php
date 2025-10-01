@@ -23,6 +23,7 @@ return new class extends Migration
         ->cascadeOnDelete();
       $table->dateTime('submitted_at')->nullable();
       $table->boolean('is_valid')->default(false);
+      $table->integer('old_db_id')->nullable();
       $table->timestamps();
     });
   }

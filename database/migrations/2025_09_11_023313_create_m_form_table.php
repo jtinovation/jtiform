@@ -24,6 +24,7 @@ return new class extends Migration
       $table->dateTime('start_at');
       $table->dateTime('end_at');
       $table->text('respondents')->nullable();
+      $table->integer('old_db_id')->nullable();
       $table->timestamps();
       $table->softDeletes();
     });

@@ -19,6 +19,7 @@ return new class extends Migration
         ->cascadeOnDelete();
       $table->string('target_type');
       $table->uuid('target_id')->nullable();
+      $table->integer('old_db_id')->nullable();
       $table->timestamps();
     });
   }

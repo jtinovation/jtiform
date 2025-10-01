@@ -6,30 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('t_answer_option', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('t_answer_id')
-            ->constrained('t_answer')
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
-            $table->foreignUuid('m_question_option_id')
-            ->constrained('m_question_option')
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
-            $table->timestamps();
-        });
-    }
+  /**
+   * Run the migrations.
+   */
+  public function up(): void
+  {
+    Schema::create('t_answer_option', function (Blueprint $table) {
+      $table->uuid('id')->primary();
+      $table->foreignUuid('t_answer_id')
+        ->constrained('t_answer')
+        ->cascadeOnUpdate()
+        ->cascadeOnDelete();
+      $table->foreignUuid('m_question_option_id')
+        ->constrained('m_question_option')
+        ->cascadeOnUpdate()
+        ->cascadeOnDelete();
+      $table->integer('old_db_id')->nullable();
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('t_answer_option');
-    }
+      $table->timestamps();
+    });
+  }
+
+  /**
+   * Reverse the migrations.
+   */
+  public function down(): void
+  {
+    Schema::dropIfExists('t_answer_option');
+  }
 };
