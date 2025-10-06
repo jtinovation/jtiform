@@ -7,9 +7,12 @@ use App\Enums\FormTypeEnum;
 use App\Helpers\ApiHelper;
 use App\Helpers\FileHelper;
 use App\Helpers\FormHelper;
+use App\Helpers\SemesterApiHelper;
+use App\Helpers\SubjectLectureApiHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Global\Form\StoreFormRequest;
 use App\Http\Requests\Global\Form\UpdateFormRequest;
+use App\Jobs\Report\GenerateEvaluationReportJob;
 use App\Models\Answer;
 use App\Models\AnswerOption;
 use Illuminate\Http\Request;
@@ -18,6 +21,7 @@ use App\Models\Form;
 use App\Models\Question;
 use App\Models\Submission;
 use App\Models\SubmissionTarget;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -29,11 +33,19 @@ class FormController extends Controller
 {
   protected $apiHelper;
   protected $formHelper;
+  protected $subjectLectureApiHelper;
+  protected $semesterApiHelper;
 
-  public function __construct(ApiHelper $apiHelper, FormHelper $formHelper)
-  {
+  public function __construct(
+    ApiHelper $apiHelper,
+    FormHelper $formHelper,
+    SubjectLectureApiHelper $subjectLectureApiHelper,
+    SemesterApiHelper $semesterApiHelper
+  ) {
     $this->apiHelper = $apiHelper;
     $this->formHelper = $formHelper;
+    $this->subjectLectureApiHelper = $subjectLectureApiHelper;
+    $this->semesterApiHelper = $semesterApiHelper;
   }
 
   public function index(Request $request)
@@ -929,5 +941,35 @@ class FormController extends Controller
       'submission'    => $submission,
       'subjectsView'  => $subjectsView,
     ]);
+  }
+
+  public function generateReport($formId)
+  {
+    $form = Form::findOrFail($formId);
+    $semesters = $this->semesterApiHelper->getSemesterAsOption(Auth::user()->token, $form->session_id);
+
+    $filteredSemesters = array_filter($semesters, function ($semester) use ($form) {
+      if ($form->is_even) {
+        return ((int)Arr::get($semester, 'semester') % 2) === 0;
+      } else {
+        return ((int)Arr::get($semester, 'semester') % 2) === 1;
+      }
+    });
+
+    User::where('roles', 'like', '%lecturer%')
+      ->chunk(30, function ($users) use ($filteredSemesters, $form) {
+        $subjectLectures =
+          $this->subjectLectureApiHelper->getSubjectLectures(
+            Auth::user()->token,
+            [
+              'user_ids' => Arr::pluck($users->toArray(), 'external_id'),
+              'semester_ids' => Arr::pluck($filteredSemesters, 'id'),
+            ]
+          );
+
+        dispatch(new GenerateEvaluationReportJob($subjectLectures, $form->id));
+      });
+
+    return redirect()->route('form.index')->with('success', 'Proses generate laporan telah dimulai. Mohon tunggu beberapa saat.');
   }
 }

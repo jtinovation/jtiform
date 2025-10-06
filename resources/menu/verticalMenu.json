@@ -4,13 +4,28 @@
       "url": "/dashboard",
       "name": "Dashboards",
       "icon": "menu-icon tf-icons ri-home-smile-line",
-      "slug": "home",
+      "slug": "dashboard",
       "roles": [
         "superadmin",
         "admin",
         "lecturer",
         "technician",
         "student"
+      ]
+    },
+    {
+      "menuHeader": "Rapor Evaluasi",
+      "roles": [
+        "lecturer"
+      ]
+    },
+    {
+      "url": "/lecture/evaluation",
+      "name": "Rapor Evaluasi Dosen",
+      "icon": "menu-icon tf-icons ri-file-list-3-line",
+      "slug": "lecture.evaluation.index",
+      "roles": [
+        "lecturer"
       ]
     },
     {

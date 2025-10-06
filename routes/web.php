@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Global\Form\FormController;
 use App\Http\Controllers\Global\Form\QuestionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Lecture\EvaluationController;
 
 Route::get('/', function () {
   return redirect()->route('login');
@@ -41,6 +42,7 @@ Route::middleware('auth')->group(function () {
       Route::post('/submit-evaluation', [FormController::class, 'submitEvaluation'])->name('form.submit.evaluation');
       Route::get('/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
       Route::get('/result-evaluation', [FormController::class, 'showEvaluationResult'])->name('form.result.evaluation');
+      Route::get('/generate-report', [FormController::class, 'generateReport'])->name('form.generate.report');
 
       Route::middleware('role:superadmin|admin')->group(function () {
         Route::get('/', [FormController::class, 'show'])->name('form.show');
@@ -59,6 +61,12 @@ Route::middleware('auth')->group(function () {
       Route::put('/update', [QuestionController::class, 'update'])->name('form.question.update');
       // Route::delete('/{questionId}', [FormController::class, 'deleteQuestion'])->name('form.questions.delete');
     });
+  });
+
+  Route::prefix('lecture')->middleware('role:lecturer')->group(function () {
+    Route::get('/evaluation', [EvaluationController::class, 'index'])->name('lecture.evaluation.index');
+    Route::get('/evaluation/{id}/report-pdf', [EvaluationController::class, 'generateReportPdf'])->name('lecture.evaluation.report.pdf');
+    Route::get('/evaluation/{formId}/report-pdf-all', [EvaluationController::class, 'generateReportPdfAll'])->name('lecture.evaluation.report.pdf.all');
   });
 
   Route::prefix('api')->group(function () {

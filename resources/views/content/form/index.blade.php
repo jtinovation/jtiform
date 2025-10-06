@@ -74,6 +74,9 @@
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
                                         data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
                                     <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{{ route('form.generate.report', $form->id) }}">
+                                            <i class="ri-file-chart-line me-1"></i>
+                                            Generate Report</a>
                                         <a class="dropdown-item" href="{{ route('form.show', $form->id) }}">
                                             <i class="ri-eye-line me-1"></i>
                                             Lihat</a>

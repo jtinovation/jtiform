@@ -28,7 +28,7 @@ return new class extends Migration
         ->cascadeOnUpdate()
         ->cascadeOnDelete();
       $table->decimal('score');
-      $table->dateTime('checked_at');
+      $table->dateTime('checked_at')->nullable();
       $table->integer('old_db_id')->nullable();
 
       $table->timestamps();

@@ -23,9 +23,15 @@
             {{-- menu headers --}}
             @if (isset($menu->menuHeader))
                 {{-- check roles --}}
-                <li class="menu-header mt-7">
-                    <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
-                </li>
+                @if (isset($menu->roles) && count(array_intersect(Auth::user()->roles, $menu->roles)) > 0)
+                    <li class="menu-header mt-7">
+                        <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
+                    </li>
+                @elseif (!isset($menu->roles))
+                    <li class="menu-header mt-7">
+                        <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
+                    </li>
+                @endif
             @else
                 {{-- active menu method --}}
                 @php
