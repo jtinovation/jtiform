@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Redis;
 
 class ApiHelper
 {
-  public function getMe(string $token): ?array
+  public static function getMe(string $token): ?array
   {
     $cacheKey = 'me_' . md5($token);
     $ttl = 300; // seconds
