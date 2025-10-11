@@ -104,6 +104,10 @@ class GenerateEvaluationReportJob implements ShouldQueue
           "course_code" => Arr::get($subjectLecture, 'subject_semester.subject.code'),
           "course_name" => Arr::get($subjectLecture, 'subject_semester.subject.name'),
           "class" => Arr::get($subjectLecture, 'subject_semester.subject.study_program.code'),
+          "study_program_id_subject" => Arr::get($subjectLecture, 'subject_semester.subject.study_program.id'),
+          "major_id_subject" => Arr::get($subjectLecture, 'subject_semester.subject.study_program.major_id'),
+          "subject_semester_id" => Arr::get($subjectLecture, 'subject_semester.id'),
+          "semester_id" => Arr::get($subjectLecture, 'subject_semester.semester_id'),
           "respondents" => $respondentsCount,
           "average_score" => $courseAverage,
           "scores" => $courseScores
@@ -127,10 +131,13 @@ class GenerateEvaluationReportJob implements ShouldQueue
         $predicate = 'Sangat Baik';
       }
 
+      $employeeDetail = $subjectLecturesForEmployee->where('employee_id', $employeeId)->first();
       $allFinalReports[] = [
         'id' => Str::uuid()->toString(),
-        'm_user_id' => $subjectLecturesForEmployee->where('employee_id', $employeeId)->first()['user_id'],
+        'm_user_id' => $employeeDetail['user_id'],
         'm_employee_id' => $employeeId, // ID dosen yang sedang diproses
+        'm_major_id_employee' => $employeeDetail['major_id_employee'] ?? null,
+        'm_study_program_id_employee' => $employeeDetail['study_program_id_employee'] ?? null,
         'm_form_id' => $this->formId,
         'report_details' => json_encode($reportDetails),
         'overall_average_score' => $overallAverageScore,

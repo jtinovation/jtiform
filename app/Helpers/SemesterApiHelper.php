@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 
 class SemesterApiHelper
 {
-  public function getSemesterAsOption(string $token, string $sessionID): ?array
+  public static function getSemesterAsOption(string $token, string $sessionID): ?array
   {
     $response = Http::withHeaders([
       'Authorization' => 'Bearer ' . $token,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Global\Form\FormController;
 use App\Http\Controllers\Global\Form\QuestionController;
+use App\Http\Controllers\Global\StudyProgramController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Lecture\EvaluationController;
 
@@ -69,10 +70,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/evaluation/{formId}/report-pdf-all', [EvaluationController::class, 'generateReportPdfAll'])->name('lecture.evaluation.report.pdf.all');
   });
 
+  Route::prefix('study-program')->group(function () {
+    Route::get('/evaluation', [StudyProgramController::class, 'reportProgram'])->name('study.program.evaluation.index');
+    Route::get('/evaluation/data', [StudyProgramController::class, 'getDataReportProgram'])->name('study.program.evaluation.data');
+    Route::post('/evaluation/generate', [StudyProgramController::class, 'generateData'])->name('study.program.evaluation.generate');
+    Route::post('/evaluation/regenerate', [StudyProgramController::class, 'regenerateData'])->name('study.program.evaluation.regenerate');
+  });
+
   Route::prefix('api')->group(function () {
     Route::get('/major/option', [SuperAppApiController::class, 'majorOption'])->name('api.major.option');
     Route::get('/study-program/option', [SuperAppApiController::class, 'studyProgramOption'])->name('api.study_program.option');
     Route::get('/student/option', [SuperAppApiController::class, 'studentOption'])->name('api.student.option');
     Route::get('/staff/option', [SuperAppApiController::class, 'staffOption'])->name('api.staff.option');
+    Route::get('/session/option', [SuperAppApiController::class, 'sessionOption'])->name('api.session.option');
   });
 });

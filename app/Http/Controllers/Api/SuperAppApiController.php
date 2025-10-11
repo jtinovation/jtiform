@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Dto\Api\GetStudentDto;
+use App\Helpers\MajorApiHelper;
+use App\Helpers\SessionApiHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,12 +14,8 @@ class SuperAppApiController extends Controller
 {
   public function majorOption()
   {
-    $response = Http::withHeaders([
-      'Authorization' => 'Bearer ' . Auth::user()->token,
-    ])
-      ->get(config('app.super_app_url') . '/majors/options');
-
-    return $response->json();
+    $majors = MajorApiHelper::getAsOptions(Auth::user()->token);
+    return $majors;
   }
 
   public function studyProgramOption(Request $request)
@@ -99,5 +97,11 @@ class SuperAppApiController extends Controller
     ];
 
     return response()->json($response);
+  }
+
+  public function sessionOption()
+  {
+    $sessions = SessionApiHelper::getAsOptions(Auth::user()->token);
+    return $sessions;
   }
 }

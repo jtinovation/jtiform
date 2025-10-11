@@ -29,6 +29,15 @@
       ]
     },
     {
+      "url": "/study-program/evaluation",
+      "name": "Rapor Evaluasi Prodi",
+      "icon": "menu-icon tf-icons ri-file-list-3-line",
+      "slug": "study.program.evaluation.index",
+      "roles": [
+        "lecturer"
+      ]
+    },
+    {
       "menuHeader": "Forms Management"
     },
     {

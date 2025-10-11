@@ -16,6 +16,8 @@ return new class extends Migration
       $table->foreignUuid('m_form_id')->constrained('m_form')->onDelete('cascade')->onUpdate('cascade');
       $table->foreignUuid('m_user_id')->constrained('m_user')->onDelete('cascade')->onUpdate('cascade');
       $table->uuid('m_employee_id')->index()->nullable();
+      $table->uuid('m_major_id_employee')->index()->nullable();
+      $table->uuid('m_study_program_id_employee')->index()->nullable();
       $table->json('report_details'); // To store scores for each course and question
       $table->decimal('overall_average_score', 5, 2); // Corresponds to 'Rata-Rata Nilai Keseluruhan Dosen (NKD)'
       $table->string('predicate'); // Corresponds to the 'Predikat' (e.g., 'Sangat Baik')
@@ -41,6 +43,10 @@ return new class extends Migration
 //         "class": "TIF-BWS",
 //         "respondents": 11,
 //         "average_score": 88.36,
+//         "study_program_id_subject": "uuid-of-study-program-subject",
+//         "major_id_subject": "uuid-of-major-subject",
+//         "subject_semester_id": "uuid-of-subject-semester",
+//         "semester_id": "uuid-of-semester",
 //         "scores": [
 //             {"question_id": 1, "score": 90.91},
 //             {"question_id": 2, "score": 90.91},
@@ -53,6 +59,10 @@ return new class extends Migration
 //         "class": "MIF",
 //         "respondents": 49,
 //         "average_score": 89.60,
+//         "study_program_id_subject": "uuid-of-study-program-subject",
+//         "major_id_subject": "uuid-of-major-subject",
+//         "subject_semester_id": "uuid-of-subject-semester",
+//         "semester_id": "uuid-of-semester",
 //         "scores": [
 //             {"question_id": 1, "score": 90.20},
 //             {"question_id": 2, "score": 89.39},

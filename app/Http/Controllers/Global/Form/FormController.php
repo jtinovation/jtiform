@@ -12,6 +12,7 @@ use App\Helpers\SubjectLectureApiHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Global\Form\StoreFormRequest;
 use App\Http\Requests\Global\Form\UpdateFormRequest;
+use App\Jobs\Report\GenerateAggregatedReports;
 use App\Jobs\Report\GenerateEvaluationReportJob;
 use App\Models\Answer;
 use App\Models\AnswerOption;
@@ -967,7 +968,7 @@ class FormController extends Controller
             ]
           );
 
-        dispatch(new GenerateEvaluationReportJob($subjectLectures, $form->id));
+        dispatch(new GenerateEvaluationReportJob($subjectLectures['data'] ?? null, $form->id))->onQueue('generate-report-evaluation');
       });
 
     return redirect()->route('form.index')->with('success', 'Proses generate laporan telah dimulai. Mohon tunggu beberapa saat.');
