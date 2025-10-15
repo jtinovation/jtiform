@@ -973,4 +973,20 @@ class FormController extends Controller
 
     return redirect()->route('form.index')->with('success', 'Proses generate laporan telah dimulai. Mohon tunggu beberapa saat.');
   }
+
+  public function showSummary($formId)
+  {
+    $form = Form::findOrFail($formId);
+
+    // if ($form->type !== FormTypeEnum::LECTURE_EVALUATION->value) {
+    //   return redirect()->route('form.result', ['id' => $formId]);
+    // }
+
+    $questions = Question::where('m_form_id', $formId)
+      ->with(['options' => fn($q) => $q->orderBy('sequence')])
+      ->orderBy('sequence')
+      ->get();
+
+    return view('content.form.summary', compact('form', 'questions'));
+  }
 }

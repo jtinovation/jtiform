@@ -4,6 +4,8 @@ namespace App\Helpers;
 
 use App\Enums\FormRespondentTypeEnum;
 use App\Models\Form;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -252,5 +254,24 @@ class FormHelper
     }
 
     return $respondents;
+  }
+
+  public static function dateRange(Request $req): array
+  {
+    $from = $req->get('from');
+    $to   = $req->get('to');
+    // Normalisasi format kalau perlu
+    if ($from) $from = Carbon::parse($from)->startOfDay();
+    if ($to)   $to   = Carbon::parse($to)->endOfDay();
+    return [$from, $to];
+  }
+
+  public static function formatRange($minAt, $maxAt): ?string
+  {
+    if (!$minAt && !$maxAt) return null;
+    $a = Carbon::parse($minAt)->translatedFormat('d M Y');
+    $b = Carbon::parse($maxAt)->translatedFormat('d M Y');
+    if ($a && $b) return "{$a} – {$b}";
+    return $a ?: $b;
   }
 }

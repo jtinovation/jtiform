@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Global\Form\FormController;
+use App\Http\Controllers\Global\Form\FormSummaryController;
 use App\Http\Controllers\Global\Form\QuestionController;
 use App\Http\Controllers\Global\StudyProgramController;
 use App\Http\Controllers\HomeController;
@@ -44,6 +45,15 @@ Route::middleware('auth')->group(function () {
       Route::get('/result', [FormController::class, 'showFormDetailSubmit'])->name('form.result');
       Route::get('/result-evaluation', [FormController::class, 'showEvaluationResult'])->name('form.result.evaluation');
       Route::get('/generate-report', [FormController::class, 'generateReport'])->name('form.generate.report');
+
+      Route::prefix('/summary')->group(function () {
+        Route::get('/', [FormController::class, 'showSummary'])->name('form.summary');
+        Route::get('/kpi', [FormSummaryController::class, 'kpi'])->name('form.summary.kpi');
+        Route::get('/respondents', [FormSummaryController::class, 'respondents'])->name('form.summary.respondents');
+        Route::get('/respondents/{submissionId}', [FormSummaryController::class, 'respondentDetail'])->name('form.summary.respondent.detail');
+        Route::get('/question-stats', [FormSummaryController::class, 'questionStats'])->name('form.summary.question.stats');
+        Route::get('/question/{questionId}/texts', [FormSummaryController::class, 'questionTexts'])->name('form.summary.question.texts');
+      });
 
       Route::middleware('role:superadmin|admin')->group(function () {
         Route::get('/', [FormController::class, 'show'])->name('form.show');

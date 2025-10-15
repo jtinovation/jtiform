@@ -23,4 +23,19 @@ class Submission extends Model
   {
     return $this->belongsTo(Form::class, 'm_form_id');
   }
+
+  public function user()
+  {
+    return $this->belongsTo(User::class, 'm_user_id');
+  }
+
+  public function targets()
+  {
+    return $this->hasMany(SubmissionTarget::class, 't_submission_id');
+  }
+
+  public function target()
+  {
+    return $this->hasOne(SubmissionTarget::class, 't_submission_id');
+  }
 }

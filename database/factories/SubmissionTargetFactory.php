@@ -10,22 +10,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class SubmissionTargetFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        $targetType = fake()->randomElement(['mk_dosen', 'dosen', 'laboran', 'teknisi', 'unit', 'fasilitas']);
-
-        return [
-            't_submission_id' => Submission::pluck('id')->random(),
-            'target_type' => $targetType,
-            'target_id' => fake()->uuid(),
-            'relation_id' => null,
-            'target_label' => fake()->name(),
-            'context_json' => json_encode([])
-        ];
-    }
+  /**
+   * Define the model's default state.
+   *
+   * @return array<string, mixed>
+   */
+  public function definition(): array
+  {
+    return [
+      't_submission_id' => Submission::pluck('id')->random(),
+      'target_type' => 'general',
+      'target_id' => null,
+    ];
+  }
 }

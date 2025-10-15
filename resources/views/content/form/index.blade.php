@@ -6,6 +6,10 @@
     @vite('resources/assets/js/index-forms.js')
 @endsection
 
+@php
+    use App\Enums\FormTypeEnum;
+@endphp
+
 @section('content')
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">
@@ -74,9 +78,11 @@
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
                                         data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('form.generate.report', $form->id) }}">
-                                            <i class="ri-file-chart-line me-1"></i>
-                                            Generate Report</a>
+                                        @if ($form->type === FormTypeEnum::LECTURE_EVALUATION->value)
+                                            <a class="dropdown-item" href="{{ route('form.generate.report', $form->id) }}">
+                                                <i class="ri-file-chart-line me-1"></i>
+                                                Generate Report</a>
+                                        @endif
                                         <a class="dropdown-item" href="{{ route('form.show', $form->id) }}">
                                             <i class="ri-eye-line me-1"></i>
                                             Lihat</a>

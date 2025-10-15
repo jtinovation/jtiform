@@ -57,10 +57,12 @@
                             @endif
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <a href="{{ route('form.question.index', $form->id) }}"
-                                class="btn btn-outline-secondary">Kembali</a>
+                            {{-- <a href="{{ route('form.question.index', $form->id) }}"
+                                class="btn btn-outline-secondary">Kembali</a> --}}
                             <a href="{{ route('form.question.edit', $form->id) }}" class="btn btn-primary">Edit
                                 Pertanyaan</a>
+                            <a href="{{ route('form.summary', $form->id) }}" class="btn btn-primary">Lihat
+                                Ringkasan</a>
                         </div>
                     </div>
                     <div class="mt-3 d-flex flex-wrap gap-2">
