@@ -1,5 +1,9 @@
 @extends('layouts/contentNavbarLayout')
 
+@php
+    use App\Enums\FormTypeEnum;
+@endphp
+
 @section('title', 'Ringkasan Form')
 
 @section('vendor-style')
@@ -67,10 +71,11 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('form.show', $form->id) }}" class="btn btn-outline-secondary">Kembali</a>
-            {{-- Export Excel: arahkan ke route kamu --}}
-            {{-- <a href="{{ route('form.summary.export', $form->id) }}" class="btn btn-success">
-                Export Excel
-            </a> --}}
+            @if ($form->type === FormTypeEnum::GENERAL->value)
+                <a href="{{ route('form.summary.export', $form->id) }}?export=1" class="btn btn-primary">
+                    Export Excel
+                </a>
+            @endif
         </div>
     </div>
 

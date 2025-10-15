@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
 
       Route::prefix('/summary')->group(function () {
         Route::get('/', [FormController::class, 'showSummary'])->name('form.summary');
+        Route::get('/export', [FormSummaryController::class, 'respondentsExport'])->name('form.summary.export');
         Route::get('/kpi', [FormSummaryController::class, 'kpi'])->name('form.summary.kpi');
         Route::get('/respondents', [FormSummaryController::class, 'respondents'])->name('form.summary.respondents');
         Route::get('/respondents/{submissionId}', [FormSummaryController::class, 'respondentDetail'])->name('form.summary.respondent.detail');

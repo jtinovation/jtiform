@@ -12,6 +12,7 @@ use App\Models\SubmissionTarget;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FormSummaryController extends Controller
 {
@@ -80,6 +81,115 @@ class FormSummaryController extends Controller
 
     return response()->json(['data' => $rows]);
   }
+
+  public function respondentsExport(Request $req, string $formId)
+  {
+    [$from, $to] = FormHelper::dateRange($req);
+    $qSearch = trim((string) $req->get('q', ''));
+
+    // ambil semua pertanyaan (urut sesuai sequence)
+    $questions = Question::where('m_form_id', $formId)
+      ->orderBy('sequence')
+      ->get(['id', 'question', 'type']);
+
+    // ambil semua submission valid + user
+    $submissions = Submission::query()
+      ->select('t_submission.id', 't_submission.submitted_at', 't_submission.is_valid', 'm_user.name')
+      ->leftJoin('m_user', 'm_user.id', '=', 't_submission.m_user_id')
+      ->where('t_submission.m_form_id', $formId)
+      ->when($from, fn($q) => $q->where('t_submission.submitted_at', '>=', $from))
+      ->when($to,   fn($q) => $q->where('t_submission.submitted_at', '<=', $to))
+      ->when($qSearch !== '', function ($q) use ($qSearch) {
+        $q->where(function ($w) use ($qSearch) {
+          $w->where('m_user.name', 'like', "%{$qSearch}%")
+            ->orWhere('m_user.email', 'like', "%{$qSearch}%");
+        });
+      })
+      ->orderByDesc('t_submission.submitted_at')
+      ->get();
+
+    // ambil semua jawaban sekali join
+    $answers = Answer::query()
+      ->select([
+        't_answer.id',
+        't_answer.text_value',
+        't_answer.m_question_id',
+        't_submission.id as submission_id',
+        't_submission_target.id as target_id',
+        'm_question.type as q_type',
+        'm_question_option.answer as opt_label'
+      ])
+      ->join('t_submission_target', 't_submission_target.id', '=', 't_answer.t_submission_target_id')
+      ->join('t_submission', 't_submission.id', '=', 't_submission_target.t_submission_id')
+      ->join('m_question', 'm_question.id', '=', 't_answer.m_question_id')
+      ->leftJoin('m_question_option', 'm_question_option.id', '=', 't_answer.m_question_option_id')
+      ->where('t_submission.m_form_id', $formId)
+      ->when($from, fn($q) => $q->where('t_submission.submitted_at', '>=', $from))
+      ->when($to,   fn($q) => $q->where('t_submission.submitted_at', '<=', $to))
+      ->get();
+
+    // ambil multi (checkbox) dari t_answer_option
+    $multiAnswers = DB::table('t_answer_option as ao')
+      ->select([
+        'a.m_question_id',
+        'ao.t_answer_id',
+        'qo.answer as opt_label'
+      ])
+      ->join('t_answer as a', 'a.id', '=', 'ao.t_answer_id')
+      ->join('t_submission_target as st', 'st.id', '=', 'a.t_submission_target_id')
+      ->join('t_submission as s', 's.id', '=', 'st.t_submission_id')
+      ->join('m_question_option as qo', 'qo.id', '=', 'ao.m_question_option_id')
+      ->where('s.m_form_id', $formId)
+      ->get()
+      ->groupBy('t_answer_id');
+
+    // map jawaban per submission id
+    $answerMap = [];
+    foreach ($answers as $a) {
+      $key = $a->submission_id;
+      $qid = $a->m_question_id;
+
+      // handle checkbox
+      if ($a->q_type === 'checkbox') {
+        $options = $multiAnswers[$a->id] ?? collect();
+        $joined = $options->pluck('opt_label')->join(', ');
+        $answerMap[$key][$qid] = $joined;
+      }
+      // handle option
+      elseif ($a->q_type === 'option') {
+        $answerMap[$key][$qid] = $a->opt_label;
+      }
+      // handle text
+      else {
+        $answerMap[$key][$qid] = $a->text_value;
+      }
+    }
+
+    // siapkan data rows dengan dynamic kolom pertanyaan
+    $headers = ['ID Responden', 'Waktu Submit', 'Nama Responden', 'Status Validasi'];
+    foreach ($questions as $q) $headers[] = $q->question;
+
+    $rows = [];
+    foreach ($submissions as $s) {
+      $row = [
+        $s->id,
+        Carbon::parse($s->submitted_at)->format('Y-m-d H:i'),
+        $s->name ?? '—',
+        $s->is_valid ? 'valid' : 'invalid'
+      ];
+
+      foreach ($questions as $q) {
+        $val = $answerMap[$s->id][$q->id] ?? '';
+        $row[] = $val;
+      }
+
+      $rows[] = $row;
+    }
+
+    $filename = 'form_' . $formId . '_responses_' . now()->format('Ymd_His') . '.xlsx';
+    return Excel::download(new \App\Exports\ExportFormRespondents($rows, $headers), $filename);
+  }
+
 
   public function respondentDetail(Request $req, string $id, string $submissionId)
   {
