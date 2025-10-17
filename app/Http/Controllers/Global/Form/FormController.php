@@ -785,9 +785,9 @@ class FormController extends Controller
     $user = Auth::user();
     $form = Form::findOrFail($formId);
 
-    if ($form->type !== FormTypeEnum::GENERAL->value) {
-      return redirect()->route('form.result', ['id' => $formId]);
-    }
+    // if ($form->type !== FormTypeEnum::GENERAL->value) {
+    //   return redirect()->route('form.result', ['id' => $formId]);
+    // }
 
     // Ambil pertanyaan + opsi untuk render
     $questions = Question::where('m_form_id', $formId)

@@ -100,7 +100,7 @@
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('form.active') }}" class="btn btn-outline-secondary">Kembali</a>
+                <a href="{{ route('form.history') }}" class="btn btn-outline-secondary">Kembali</a>
             </div>
         </div>
         <div class="card-body pt-0">

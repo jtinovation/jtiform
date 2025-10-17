@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Global\Form\FormController;
+use App\Http\Controllers\Global\Form\FormSubmissionController;
 use App\Http\Controllers\Global\Form\FormSummaryController;
 use App\Http\Controllers\Global\Form\QuestionController;
 use App\Http\Controllers\Global\StudyProgramController;
@@ -35,6 +36,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/active', [FormController::class, 'active'])->name('form.active');
     Route::get('/history', [FormController::class, 'history'])->name('form.history');
+
+    Route::prefix('submission')->group(function () {
+      Route::get('/proof/{id}', [FormSubmissionController::class, 'printProof'])->name('form.proof.print');
+    });
 
     Route::prefix('/{id}')->group(function () {
       Route::get('/fill', [FormController::class, 'fill'])->name('form.fill');

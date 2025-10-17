@@ -85,6 +85,9 @@
                                                 href="{{ route('form.result.evaluation', ['id' => $submission->form->id]) }}"><i
                                                     class="ri-edit-line me-1"></i> Lihat Detail</a>
                                         @endif
+                                        <a class="dropdown-item"
+                                            href="{{ route('form.proof.print', ['id' => $submission->id]) }}"
+                                            target="_blank"><i class="ri-printer-line me-1"></i> Cetak Bukti</a>
                                     </div>
                                 </div>
                             </td>
