@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 
@@ -23,6 +24,12 @@ class ApiHelper
       ->get(config('app.super_app_url') . '/auth/me');
 
     if ($response->failed()) {
+      if ($response->status() === 401) {
+        Redis::del($cacheKey);
+        Auth::logout();
+        session()->invalidate();
+      }
+
       return null;
     }
 

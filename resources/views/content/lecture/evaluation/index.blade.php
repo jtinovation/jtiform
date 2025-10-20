@@ -91,7 +91,7 @@
                     @endforeach
                     @if ($reports->isEmpty())
                         <tr>
-                            <td colspan="6" class="text-center">No data available</td>
+                            <td colspan="7" class="text-center">No data available</td>
                         </tr>
                     @endif
                 </tbody>
