@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Rapor Evaluasi Dosen')
+@section('title', 'Rapor Evaluasi Saya')
 
 @section('page-script')
     @vite('resources/assets/js/index-report.js')
@@ -12,7 +12,7 @@
             <li class="breadcrumb-item">
                 <a href="{{ route('dashboard') }}">Dashboard</a>
             </li>
-            <li class="breadcrumb-item active">Rapor Evaluasi Dosen</li>
+            <li class="breadcrumb-item active">Rapor Evaluasi Saya</li>
         </ol>
     </nav>
 

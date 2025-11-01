@@ -16,6 +16,8 @@ class Report extends Model
     'm_form_id',
     'm_user_id',
     'm_employee_id',
+    'm_major_id_employee',
+    'm_study_program_id_employee',
     'report_details',
     'overall_average_score',
     'predicate',

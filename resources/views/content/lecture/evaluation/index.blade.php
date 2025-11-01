@@ -12,7 +12,9 @@
         </ol>
     </nav>
 
-    @include('content.lecture.evaluation.partials.filter')
+    @notrole('kaprodi')
+        @include('content.lecture.evaluation.partials.filter')
+    @endnotrole
 
     <div class="card">
         <div class="row g-2 align-items-center my-3 mx-1">

@@ -42,4 +42,9 @@ class Form extends Model
   {
     return $this->hasMany(Submission::class, 'm_form_id', 'id');
   }
+
+  public function reports()
+  {
+    return $this->hasMany(Report::class, 'm_form_id', 'id');
+  }
 }

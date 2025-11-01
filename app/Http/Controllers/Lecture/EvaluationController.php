@@ -22,6 +22,15 @@ class EvaluationController extends Controller
     $majorId = $request->input('major_id');
     $studyProgramId = $request->input('study_program_id');
 
+    $user = Auth::user();
+    $majors = MajorApiHelper::getAsOptions($user->token)['data'] ?? [];
+
+    if ($user->hasAnyRole('kajur|kaprodi')) {
+      $majors = array_filter($majors, function ($major) use ($user) {
+        return $major['value'] == $user->major_id;
+      });
+    }
+
     $lectures = User::query()
       ->whereJsonContains('roles', 'lecturer')
       ->withAvg('reports as avg_score', 'overall_average_score')
@@ -31,6 +40,13 @@ class EvaluationController extends Controller
             ->orWhere('email', 'like', '%' . $search . '%');
         });
       })
+      ->when($user->hasRole('kajur'), function ($query) use ($user) {
+        $query->where('major_id', $user->major_id);
+      })
+      ->when($user->hasRole('kaprodi'), function ($query) use ($user) {
+        $query->where('major_id', $user->major_id)
+          ->where('study_program_id', $user->study_program_id);
+      })
       ->when($majorId, function ($query, $majorId) {
         $query->where('major_id', $majorId);
       })
@@ -39,15 +55,6 @@ class EvaluationController extends Controller
       })
       ->orderBy('name', 'asc')
       ->paginate(10);
-
-    $user = Auth::user();
-    $majors = MajorApiHelper::getAsOptions(Auth::user()->token)['data'] ?? [];
-
-    if (Auth::user()->hasAnyRole('kajur|kaprodi')) {
-      $majors = array_filter($majors, function ($major) use ($user) {
-        return $major['value'] == $user->major_id;
-      });
-    }
 
     return view('content.lecture.evaluation.index', compact('lectures', 'majors'));
   }
@@ -79,7 +86,6 @@ class EvaluationController extends Controller
   public function generateReportPdf($id)
   {
     $report = Report::where('id', $id)
-      ->where('m_user_id', Auth::user()->id)
       ->with([
         'form.questions' => function ($query) {
           $query->orderBy('sequence', 'asc');
@@ -92,14 +98,24 @@ class EvaluationController extends Controller
     return $pdf->setPaper('a4', 'potrait')->stream('rapor-evaluasi-' . $report->form->code . '.pdf');
   }
 
-  public function generateReportPdfAll($formId)
+  public function generateReportPdfAll(Request $request, $formId)
   {
+    $majorId = $request->input('major_id');
+    $studyProgramId = $request->input('study_program_id');
+
     if (Auth::user()->hasRole('kaprodi')) {
       $userDetails = ApiHelper::getMe(Auth::user()->token);
       $employees = EmployeeHelper::getEmployeeAsOptions(
         Auth::user()->token,
         $userDetails['employee_detail']['m_major_id'],
         $userDetails['employee_detail']['m_study_program_id'],
+        'DOSEN'
+      );
+    } elseif ($majorId && $studyProgramId) {
+      $employees = EmployeeHelper::getEmployeeAsOptions(
+        Auth::user()->token,
+        $majorId,
+        $studyProgramId,
         'DOSEN'
       );
     } else {

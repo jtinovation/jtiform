@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Rapor Evaluasi Dosen')
+@section('title', 'Rapor Evaluasi Prodi')
 
 @section('content')
     <nav aria-label="breadcrumb">

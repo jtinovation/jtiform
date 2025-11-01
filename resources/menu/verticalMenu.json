@@ -73,6 +73,20 @@
       ]
     },
     {
+      "url": "/evaluation",
+      "name": "List Rapor",
+      "icon": "menu-icon tf-icons ri-file-list-3-line",
+      "slug": "evaluation.index",
+      "roles": [
+        "superadmin",
+        "admin",
+        "direktur",
+        "wadir",
+        "kajur",
+        "kaprodi"
+      ]
+    },
+    {
       "menuHeader": "Forms Management"
     },
     {

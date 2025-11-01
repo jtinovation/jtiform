@@ -68,13 +68,6 @@
                                         target="_blank">
                                         <i class="ri-file-download-line me-1"></i>
                                         Download Rapor Saya</a>
-                                    @role('kajur|kaprodi')
-                                        <a class="dropdown-item"
-                                            href="{{ route('lecture.evaluation.report.pdf.all', $report->form->id) }}"
-                                            target="_blank">
-                                            <i class="ri-file-download-line me-1"></i>
-                                            Download Semua Rapor</a>
-                                    @endrole('kajur')
                                 </div>
                             </div>
                         </td>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Global\Form\QuestionController;
 use App\Http\Controllers\Global\StudyProgramController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Lecture\EvaluationController;
+use App\Http\Controllers\Global\EvaluationController as GlobalEvaluationController;
 
 Route::get('/', function () {
   return redirect()->route('login');
@@ -81,10 +82,12 @@ Route::middleware('auth')->group(function () {
     });
   });
 
+  Route::get('/evaluation', [GlobalEvaluationController::class, 'index'])->name('evaluation.index');
+
   Route::prefix('lecture')->middleware('role:superadmin|admin|lecturer')->group(function () {
     Route::get('/evaluation', [EvaluationController::class, 'index'])->name('lecture.evaluation.index');
     Route::get('/evaluation/my', [EvaluationController::class, 'my'])->name('lecture.evaluation.my.index');
-    Route::get('/evaluation/{userId}', [EvaluationController::class, 'show'])->name('lecture.evaluation.show');
+    Route::get('/evaluation/{userId}/show', [EvaluationController::class, 'show'])->name('lecture.evaluation.show');
     Route::get('/evaluation/{id}/report-pdf', [EvaluationController::class, 'generateReportPdf'])->name('lecture.evaluation.report.pdf');
     Route::get('/evaluation/{formId}/report-pdf-all', [EvaluationController::class, 'generateReportPdfAll'])->name('lecture.evaluation.report.pdf.all');
   });
