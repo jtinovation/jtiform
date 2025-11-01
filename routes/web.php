@@ -26,6 +26,7 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
   Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+  Route::get('/dashboard/my', [HomeController::class, 'myDashboard'])->name('dashboard.my');
 
   Route::prefix('form')->group(function () {
     Route::middleware('role:superadmin|admin')->group(function () {
@@ -80,8 +81,10 @@ Route::middleware('auth')->group(function () {
     });
   });
 
-  Route::prefix('lecture')->middleware('role:lecturer')->group(function () {
+  Route::prefix('lecture')->middleware('role:superadmin|admin|lecturer')->group(function () {
     Route::get('/evaluation', [EvaluationController::class, 'index'])->name('lecture.evaluation.index');
+    Route::get('/evaluation/my', [EvaluationController::class, 'my'])->name('lecture.evaluation.my.index');
+    Route::get('/evaluation/{userId}', [EvaluationController::class, 'show'])->name('lecture.evaluation.show');
     Route::get('/evaluation/{id}/report-pdf', [EvaluationController::class, 'generateReportPdf'])->name('lecture.evaluation.report.pdf');
     Route::get('/evaluation/{formId}/report-pdf-all', [EvaluationController::class, 'generateReportPdfAll'])->name('lecture.evaluation.report.pdf.all');
   });

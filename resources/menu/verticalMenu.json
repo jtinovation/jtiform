@@ -14,27 +14,62 @@
       ]
     },
     {
+      "url": "/dashboard/my",
+      "name": "Dashboard Saya",
+      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "slug": "dashboard.my",
+      "roles": [
+        "direktur",
+        "wadir",
+        "kajur",
+        "kaprodi"
+      ]
+    },
+    {
       "menuHeader": "Rapor Evaluasi",
       "roles": [
+        "superadmin",
+        "admin",
+        "lecturer"
+      ]
+    },
+    {
+      "url": "/lecture/evaluation/my",
+      "name": "Rapor Saya",
+      "icon": "menu-icon tf-icons ri-file-list-3-line",
+      "slug": "lecture.evaluation.my.index",
+      "roles": [
+        "superadmin",
+        "admin",
         "lecturer"
       ]
     },
     {
       "url": "/lecture/evaluation",
-      "name": "Rapor Evaluasi Dosen",
+      "name": "Rapor Dosen",
       "icon": "menu-icon tf-icons ri-file-list-3-line",
       "slug": "lecture.evaluation.index",
       "roles": [
-        "lecturer"
+        "superadmin",
+        "admin",
+        "direktur",
+        "wadir",
+        "kajur",
+        "kaprodi"
       ]
     },
     {
       "url": "/study-program/evaluation",
-      "name": "Rapor Evaluasi Prodi",
+      "name": "Rapor Prodi",
       "icon": "menu-icon tf-icons ri-file-list-3-line",
       "slug": "study.program.evaluation.index",
       "roles": [
-        "lecturer"
+        "superadmin",
+        "admin",
+        "direktur",
+        "wadir",
+        "kajur",
+        "kaprodi"
       ]
     },
     {

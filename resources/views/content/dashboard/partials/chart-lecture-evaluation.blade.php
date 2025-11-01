@@ -1,3 +1,7 @@
+@php
+    use App\Helpers\GlobalHelper;
+@endphp
+
 <div class="col-12">
     <div class="row g-3">
         <div class="col-12 col-sm-6 col-lg-3">
@@ -15,7 +19,7 @@
                     <h6 class="mb-0 fw-normal">Nilai Keseluruhan</h6>
                     <p class="mb-0">
                         <span class="me-1 fw-medium">
-                            {!! trendBadge($lectureReportData['kpi']['trendPct'] ?? 0) !!}
+                            {!! GlobalHelper::trendBadgeDashboard($lectureReportData['kpi']['trendPct'] ?? 0) !!}
                         </span>
                         <small class="text-body-secondary">vs report sebelumnya</small>
                     </p>
@@ -37,7 +41,7 @@
                     <h6 class="mb-0 fw-normal">Jumlah Mata Kuliah</h6>
                     <p class="mb-0">
                         <span class="me-1 fw-medium">
-                            {!! trendBadge($lectureReportData['kpi']['coursesTrendPct'] ?? 0) !!}
+                            {!! GlobalHelper::trendBadgeDashboard($lectureReportData['kpi']['coursesTrendPct'] ?? 0) !!}
                         </span>
                         <small class="text-body-secondary">vs report sebelumnya</small>
                     </p>
@@ -59,7 +63,7 @@
                     <h6 class="mb-0 fw-normal">Total Responden</h6>
                     <p class="mb-0">
                         <span class="me-1 fw-medium">
-                            {!! trendBadge($lectureReportData['kpi']['respondentsTrendPct'] ?? 0) !!}
+                            {!! GlobalHelper::trendBadgeDashboard($lectureReportData['kpi']['respondentsTrendPct'] ?? 0) !!}
                         </span>
                         <small class="text-body-secondary">vs report sebelumnya</small>
                     </p>
@@ -76,12 +80,14 @@
                                 <i class="icon-base ri ri-file-text-line icon-24px"></i>
                             </span>
                         </div>
-                        <h4 class="mb-0">
+                        <h4 class="mb-0" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="{{ $lectureReportData['selectedReport']?->form?->code ?? '-' }}">
                             {{ \Illuminate\Support\Str::limit($lectureReportData['selectedReport']?->form?->code ?? '-', 10) }}
                         </h4>
                     </div>
 
-                    <h6 class="mb-0 fw-normal">
+                    <h6 class="mb-0 fw-normal" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="{{ $lectureReportData['selectedReport']?->form?->title ?? '-' }}">
                         {{ \Illuminate\Support\Str::limit($lectureReportData['selectedReport']?->form?->title ?? '-', 30) }}
                     </h6>
 
@@ -99,7 +105,7 @@
     <div class="card">
         <div class="card-body text-nowrap">
             <h5 class="card-title mb-0 flex-wrap text-nowrap">
-                Rekapitulasi Rapor Evaluasi Saya
+                Rekapitulasi Rapor Evaluasi {{ $user->name }}
             </h5>
             <div id="reportChart"></div>
         </div>
@@ -110,7 +116,8 @@
     <div class="card h-100">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="card-title mb-0">Rata-rata Nilai per Matakuliah</h5>
+                <h5 class="card-title mb-0">Rata-rata Nilai per Matakuliah
+                    {{ $lectureReportData['selectedReport']?->form?->code }}</h5>
             </div>
             <div id="courseBarChart"></div>
         </div>
@@ -121,7 +128,8 @@
     <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="card-title mb-0">Rata-rata per Pertanyaan</h5>
+                <h5 class="card-title mb-0">Rata-rata per Pertanyaan
+                    {{ $lectureReportData['selectedReport']?->form?->code }}</h5>
             </div>
             <div id="questionBarChart"></div>
         </div>
@@ -131,7 +139,7 @@
 <div class="col-12">
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title mb-2">Detail Matakuliah</h5>
+            <h5 class="card-title mb-2">Detail Matakuliah {{ $lectureReportData['selectedReport']?->form?->code }}</h5>
             <div class="table-responsive">
                 <table class="table table-sm table-hover">
                     <thead>
@@ -165,6 +173,16 @@
         </div>
     </div>
 </div>
+
+@php
+    use Illuminate\Support\Facades\Route;
+    $routeName = Route::currentRouteName();
+@endphp
+@if ($routeName !== 'dashboard' && $routeName !== 'dashboard.my')
+    <div class="col-12">
+        @include('content.lecture.evaluation.my.partials.table')
+    </div>
+@endif
 
 @push('page-script')
     <script>

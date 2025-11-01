@@ -25,5 +25,10 @@ class AppServiceProvider extends ServiceProvider
       if (!Auth::check()) return false;
       return Auth::user()->matchesRoles($roles, $mode);
     });
+
+    Blade::if('notrole', function (string $roles, string $mode = 'any') {
+      if (!Auth::check()) return true;
+      return !Auth::user()->matchesRoles($roles, $mode);
+    });
   }
 }

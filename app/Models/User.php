@@ -27,6 +27,8 @@ class User extends Authenticatable
     'email',
     'roles',
     'permissions',
+    'major_id',
+    'study_program_id',
   ];
 
   /**
@@ -42,6 +44,11 @@ class User extends Authenticatable
     'roles' => 'array',
     'permissions' => 'array',
   ];
+
+  public function reports()
+  {
+    return $this->hasMany(Report::class, 'm_user_id', 'id');
+  }
 
 
   protected function normalizedRoles(): array
@@ -69,6 +76,16 @@ class User extends Authenticatable
 
     $own = $this->normalizedRoles();
     return count(array_intersect($required, $own)) > 0;
+  }
+
+  public function hasNoRole(array|string $roles): bool
+  {
+    $required = is_array($roles) ? $roles : explode('|', $roles);
+    $required = array_filter(array_map(fn($r) => strtolower(trim($r)), $required));
+    if (empty($required)) return true;
+
+    $own = $this->normalizedRoles();
+    return count(array_intersect($required, $own)) === 0;
   }
 
   public function hasAllRoles(array|string $roles): bool

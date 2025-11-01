@@ -17,7 +17,14 @@ class StudyProgramController extends Controller
 {
   public function reportProgram(Request $request)
   {
-    $majorOptions = MajorApiHelper::getAsOptions(Auth::user()->token)['data'] ?? [];
+    $user = Auth::user();
+    $majorOptions = MajorApiHelper::getAsOptions($user->token)['data'] ?? [];
+
+    if ($user->hasAnyRole('kajur|kaprodi')) {
+      $majorOptions = array_filter($majorOptions, function ($major) use ($user) {
+        return $major['value'] == $user->major_id;
+      });
+    }
 
     return view('content.study-program.evaluation', compact('majorOptions'));
   }

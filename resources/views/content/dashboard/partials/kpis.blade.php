@@ -1,3 +1,6 @@
+@php
+    use App\Helpers\GlobalHelper;
+@endphp
 <div class="col-12 col-sm-6 col-lg-3">
     <div class="card card-border-shadow-primary">
         <div class="card-body">
@@ -12,7 +15,7 @@
             <h6 class="mb-0 fw-normal">Form Aktif</h6>
             <p class="mb-0">
                 <span class="me-1 fw-medium">
-                    {!! trendBadge($kpis['active_forms']['trend'] ?? 0) !!}
+                    {!! GlobalHelper::trendBadgeDashboard($kpis['active_forms']['trend'] ?? 0) !!}
                 </span>
                 <small class="text-body-secondary">vs semester lalu</small>
             </p>
@@ -34,7 +37,7 @@
             <h6 class="mb-0 fw-normal">Total Responden Valid</h6>
             <p class="mb-0">
                 <span class="me-1 fw-medium">
-                    {!! trendBadge($kpis['valid_submissions']['trend'] ?? 0) !!}
+                    {!! GlobalHelper::trendBadgeDashboard($kpis['valid_submissions']['trend'] ?? 0) !!}
                 </span>
                 <small class="text-body-secondary">vs semester lalu</small>
             </p>
@@ -56,7 +59,7 @@
             <h6 class="mb-0 fw-normal">Rata-rata Skor Dosen</h6>
             <p class="mb-0">
                 <span class="me-1 fw-medium">
-                    {!! trendBadge($kpis['avg_score']['trend'] ?? 0) !!}
+                    {!! GlobalHelper::trendBadgeDashboard($kpis['avg_score']['trend'] ?? 0) !!}
                 </span>
                 <small class="text-body-secondary">vs semester lalu</small>
             </p>
@@ -78,7 +81,7 @@
             <h6 class="mb-0 fw-normal">Partisipasi (%)</h6>
             <p class="mb-0">
                 <span class="me-1 fw-medium">
-                    {!! trendBadge($kpis['participation_pct']['trend'] ?? 0) !!}
+                    {!! GlobalHelper::trendBadgeDashboard($kpis['participation_pct']['trend'] ?? 0) !!}
                 </span>
                 <small class="text-body-secondary">vs semester lalu</small>
             </p>

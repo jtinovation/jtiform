@@ -10,24 +10,6 @@
     @vite('resources/assets/vendor/libs/apex-charts/apexcharts.js')
 @endsection
 
-@php
-    function trendBadge($pct)
-    {
-        if (is_null($pct)) {
-            return '<span class="badge bg-label-secondary">–</span>';
-        }
-        $icon = $pct >= 0 ? 'icon-base ri ri-arrow-up-s-line' : 'icon-base ri ri-arrow-down-s-line';
-        $cls = $pct >= 0 ? 'bg-label-success' : 'bg-label-danger';
-        return '<span class="badge ' .
-            $cls .
-            ' d-inline-flex align-items-center gap-1"><i class="' .
-            $icon .
-            '"></i> ' .
-            number_format(abs($pct), 1) .
-            '%</span>';
-    }
-@endphp
-
 @section('content')
     <div class="row gy-6">
         @if ($activeForm && $activeForm->count() > 0)
@@ -57,7 +39,9 @@
         @endrole
 
         @role('lecturer')
-            @include('content.dashboard.partials.chart-lecture-evaluation')
+            @notrole('direktur|wadir|kajur|kaprodi')
+                @include('content.dashboard.partials.chart-lecture-evaluation')
+            @endnotrole
         @endrole
     </div>
 @endsection

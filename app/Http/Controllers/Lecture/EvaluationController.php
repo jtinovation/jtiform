@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Lecture;
 
 use App\Helpers\ApiHelper;
 use App\Helpers\EmployeeHelper;
+use App\Helpers\EvaluationHelper;
+use App\Helpers\HomeHelper;
+use App\Helpers\MajorApiHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use App\Models\User;
@@ -16,23 +19,61 @@ class EvaluationController extends Controller
   public function index(Request $request)
   {
     $search = $request->input('search');
-    $reports = Report::where('m_user_id', Auth::user()->id)
-      ->with('form')
+    $majorId = $request->input('major_id');
+    $studyProgramId = $request->input('study_program_id');
+
+    $lectures = User::query()
+      ->whereJsonContains('roles', 'lecturer')
+      ->withAvg('reports as avg_score', 'overall_average_score')
       ->when($search, function ($query, $search) {
-        $query->whereHas('form', function ($q) use ($search) {
-          $q->where(function ($subQuery) use ($search) {
-            $subQuery->where('title', 'like', '%' . $search . '%')
-              ->orWhere('code', 'like', '%' . $search . '%')
-              ->orWhere('description', 'like', '%' . $search . '%');
-          });
+        $query->where(function ($subQuery) use ($search) {
+          $subQuery->where('name', 'like', '%' . $search . '%')
+            ->orWhere('email', 'like', '%' . $search . '%');
         });
       })
-      ->orderBy('created_at', 'desc')
-      ->paginate(10)
-      ->withQueryString();
+      ->when($majorId, function ($query, $majorId) {
+        $query->where('major_id', $majorId);
+      })
+      ->when($studyProgramId, function ($query, $studyProgramId) {
+        $query->where('study_program_id', $studyProgramId);
+      })
+      ->orderBy('name', 'asc')
+      ->paginate(10);
 
+    $user = Auth::user();
+    $majors = MajorApiHelper::getAsOptions(Auth::user()->token)['data'] ?? [];
 
-    return view('content.lecture.evaluation.index', compact('reports'));
+    if (Auth::user()->hasAnyRole('kajur|kaprodi')) {
+      $majors = array_filter($majors, function ($major) use ($user) {
+        return $major['value'] == $user->major_id;
+      });
+    }
+
+    return view('content.lecture.evaluation.index', compact('lectures', 'majors'));
+  }
+
+  public function show($userId, Request $request)
+  {
+    $search = $request->input('search');
+
+    $user = User::where('id', $userId)
+      ->whereJsonContains('roles', 'lecturer')
+      ->withAvg('reports as avg_score', 'overall_average_score')
+      ->firstOrFail();
+
+    $lectureReportData = HomeHelper::lectureReportData(userId: $user->id);
+
+    $reports = EvaluationHelper::getEvaluationReports($user->id, $request);
+    return view('content.lecture.evaluation.show', compact('user', 'lectureReportData', 'reports'));
+  }
+
+  public function my(Request $request)
+  {
+    $user = Auth::user();
+
+    $reports = EvaluationHelper::getEvaluationReports($user->id, $request);
+
+    return view('content.lecture.evaluation.my.index', compact('reports'));
   }
 
   public function generateReportPdf($id)

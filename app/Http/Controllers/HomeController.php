@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\FormTypeEnum;
 use App\Helpers\ApiHelper;
 use App\Helpers\FormHelper;
 use App\Helpers\HomeHelper;
 use App\Helpers\MajorApiHelper;
 use App\Helpers\SessionApiHelper;
-use App\Helpers\SubjectLectureApiHelper;
-use App\Models\Form;
-use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -41,6 +36,7 @@ class HomeController extends Controller
     $prodiChart = null;
     $questionStackChart = null;
     $lectureReportData = null;
+    $reports = null;
 
     if (Auth::user()->hasAnyRole('superadmin|admin|direktur|wadir|kajur|kaprodi')) {
       $filter = [
@@ -58,8 +54,15 @@ class HomeController extends Controller
       $lectureReportData = HomeHelper::lectureReportData();
     }
 
-    if (Auth::user()->hasAnyRole('lecturer')) {
+    $user = Auth::user();
+    if (Auth::user()->hasAnyRole('lecturer') && Auth::user()->hasNoRole('direktur|wadir|kajur|kaprodi')) {
       $lectureReportData = HomeHelper::lectureReportData();
+    }
+
+    if (Auth::user()->hasAnyRole('kajur|kaprodi')) {
+      $majors = array_filter($majors, function ($major) use ($user) {
+        return $major['value'] == $user->major_id;
+      });
     }
 
     return view('content.dashboard.dashboard-main', compact(
@@ -69,7 +72,20 @@ class HomeController extends Controller
       'kpis',
       'prodiChart',
       'questionStackChart',
-      'lectureReportData'
+      'lectureReportData',
+      'user',
+      'reports'
+    ));
+  }
+
+  public function myDashboard(Request $req)
+  {
+    $user = Auth::user();
+    $lectureReportData = HomeHelper::lectureReportData();
+
+    return view('content.dashboard.dashboard-my', compact(
+      'lectureReportData',
+      'user',
     ));
   }
 }

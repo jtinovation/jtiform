@@ -386,9 +386,9 @@ class HomeHelper
     ];
   }
 
-  public static function lectureReportData(?string $reportId = null): array
+  public static function lectureReportData(?string $reportId = null, ?string $userId = null): array
   {
-    $reports = Report::where('m_user_id', Auth::id())
+    $reports = Report::where('m_user_id', $userId ?? Auth::id())
       ->with(['form.questions' => fn($q) => $q->orderBy('sequence', 'asc')])
       ->where('overall_average_score', '>', 0)
       ->orderBy('created_at', 'desc')
@@ -440,19 +440,39 @@ class HomeHelper
     $totalRespondents = (int) $courses->sum('respondents');
     $totalCourses = (int) $courses->count();
 
+    // Trend jumlah matakuliah dibanding report sebelumnya
+    $courseTrendPct = null;
+    if ($prev) {
+      $prevCoursesCount = count($prev->report_details ?? []);
+      if ($prevCoursesCount > 0) {
+        $courseTrendPct = round((($totalCourses - $prevCoursesCount) / $prevCoursesCount) * 100, 2);
+      }
+    }
+
+    // Trend jumlah responden dibanding report sebelumnya
+    $respondentsTrendPct = null;
+    if ($prev) {
+      $prevRespondents = (int) collect($prev->report_details ?? [])->sum('respondents');
+      if ($prevRespondents > 0) {
+        $respondentsTrendPct = round((($totalRespondents - $prevRespondents) / $prevRespondents) * 100, 2);
+      }
+    }
+
     $kpi = [
       'overall'   => $latestOverall,
       'predicate' => $latestPredicate,
       'trendPct'  => $trendPct, // naik turun %
       'courses'   => $totalCourses,
+      'coursesTrendPct' => $courseTrendPct,
       'respondents' => $totalRespondents,
+      'respondentsTrendPct' => $respondentsTrendPct
     ];
 
     // ===== Area Chart "Rekapitulasi Rapor Evaluasi Saya" (punyamu) =====
     $reportChartData = [
-      'chartLabels'    => $reports->pluck('form.code'),
-      'chartData'      => $reports->pluck('overall_average_score'),
-      'chartPredicates' => $reports->pluck('predicate'),
+      'chartLabels'    => $reports->pluck('form.code')->reverse()->values(),
+      'chartData'      => $reports->pluck('overall_average_score')->reverse()->values(),
+      'chartPredicates' => $reports->pluck('predicate')->reverse()->values(),
     ];
 
     // ===== Bar Chart: Rata-rata per Matakuliah (dari selected report_details) =====
