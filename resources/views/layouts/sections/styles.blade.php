@@ -7,11 +7,7 @@
 
 @vite(['resources/assets/vendor/fonts/remixicon/remixicon.scss'])
 <!-- Core CSS -->
-@vite([
-  'resources/assets/vendor/scss/core.scss',
-  'resources/assets/vendor/scss/theme-default.scss',
-  'resources/assets/css/demo.css'
-])
+@vite(['resources/assets/vendor/scss/core.scss', 'resources/assets/vendor/scss/theme-default.scss', 'resources/assets/css/demo.css'])
 
 <!-- Vendor Styles -->
 @vite(['resources/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.scss'])
@@ -19,3 +15,4 @@
 
 <!-- Page Styles -->
 @yield('page-style')
+@stack('styles')

@@ -1,0 +1,91 @@
+// resources/scss/landing.scss
+// Brand palette (revised)
+$jt-primary: #5766da; // biru-ungu lembut
+$jt-accent: lighten($jt-primary, 12%);
+$jt-cyan: #4fd1c5;
+$jt-dark: #0f172a;
+$jt-surface: #1e293b;
+$jt-text: #f1f5f9;
+
+.hero {
+  min-height: 78vh;
+  display: grid;
+  align-items: center;
+  position: relative;
+  color: #fff;
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background: url('/resources/assets/images/jti.jpg') center/cover no-repeat;
+    filter: brightness(0.85) saturate(1.05);
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(800px 400px at 10% 10%, rgba($jt-primary, 0.35), transparent 60%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.65));
+    backdrop-filter: blur(1px);
+  }
+
+  .hero__logo {
+    position: absolute;
+    right: 2rem;
+    bottom: 2rem;
+    height: 40px;
+    opacity: 0.85;
+  }
+}
+
+.glass-card {
+  background: rgba($jt-dark, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: $jt-text;
+}
+
+.chart-bar {
+  width: 14%;
+  background: linear-gradient(180deg, $jt-accent, $jt-primary);
+  border-radius: 0.35rem;
+}
+
+.hover-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.step-circle {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  border-radius: 50%;
+  background: rgba($jt-primary, 0.12);
+  color: $jt-primary;
+  font-weight: 700;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, $jt-primary, $jt-dark);
+}
+
+footer a:hover {
+  color: $jt-primary !important;
+}
+
+// Navbar transparan landing
+.layout-navbar {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  .nav-link.active,
+  .nav-link:hover {
+    color: $jt-primary !important;
+  }
+}

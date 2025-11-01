@@ -11,38 +11,36 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 class LoginController extends Controller
 {
 
-    public function showLoginForm()
-    {
-        return view('auth.login');
+  public function showLoginForm()
+  {
+    return view('landing.index');
+  }
+
+
+  public function login(Request $request)
+  {
+    $request->validate([
+      'email' => 'required|email',
+      'password' => 'required|min:6',
+    ]);
+    $credentials = $request->only('email', 'password');
+
+    try {
+      if (! $token = JWTAuth::attempt($credentials)) {
+        return back()->withErrors(['login_error' => 'Email atau password salah']);
+      }
+    } catch (JWTException $e) {
+      return back()->withErrors(['login_error' => 'Gagal membuat token']);
     }
 
 
-    public function login(Request $request)
-    {
-       $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ]);
-        $credentials = $request->only('email', 'password');
-
-        try {
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return back()->withErrors(['login_error' => 'Email atau password salah']);
-            }
-        } catch (JWTException $e) {
-            return back()->withErrors(['login_error' => 'Gagal membuat token']);
-        }
+    return redirect('/dashboard')->withCookie(cookie('jwt_token', $token, 60, null, null, false, true));
+  }
 
 
-        return redirect('/dashboard')->withCookie(cookie('jwt_token', $token, 60, null, null, false, true));
-    }
-
-
-    public function logout()
-    {
-        $cookie = cookie()->forget('jwt_token');
-        return redirect('/login')->withCookie($cookie);
-    }
-
-
+  public function logout()
+  {
+    $cookie = cookie()->forget('jwt_token');
+    return redirect('/login')->withCookie($cookie);
+  }
 }
