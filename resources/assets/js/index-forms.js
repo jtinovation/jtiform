@@ -46,4 +46,26 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#form-filter').submit();
     }, 1000);
   });
+
+  const modalEl = document.getElementById('cloneFormModal');
+  if (!modalEl) return;
+
+  modalEl.addEventListener('show.bs.modal', event => {
+    const btn = event.relatedTarget;
+    const formId = btn.getAttribute('data-id');
+    const code = btn.getAttribute('data-code') || '';
+    const title = btn.getAttribute('data-title') || '';
+    const description = btn.getAttribute('data-description') || '';
+    const startAt = btn.getAttribute('data-start') || '';
+    const endAt = btn.getAttribute('data-end') || '';
+
+    const form = modalEl.querySelector('form#cloneForm');
+    form.setAttribute('action', `/form/${formId}/clone`);
+
+    form.querySelector('input[name="code"]').value = `${code}-COPY`;
+    form.querySelector('input[name="title"]').value = `${title} (Copy)`;
+    form.querySelector('textarea[name="description"]').value = description || '';
+    form.querySelector('input[name="start_at"]').value = startAt || '';
+    form.querySelector('input[name="end_at"]').value = endAt || '';
+  });
 });

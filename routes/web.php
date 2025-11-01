@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('/{id}')->group(function () {
+      Route::post('/clone', [FormController::class, 'clone'])->middleware('role:superadmin|admin|direktur|wadir|kajur|kaprodi')->name('form.clone');
       Route::get('/fill', [FormController::class, 'fill'])->name('form.fill');
       Route::post('/choose-lecture', [FormController::class, 'storeChosenLectures'])->name('form.choose-lecture.store');
       Route::get('/fill-lecture', [FormController::class, 'fillLecture'])->name('form.fill.lecture');

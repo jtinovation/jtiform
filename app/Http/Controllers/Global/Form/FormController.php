@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Global\Form;
 
-use App\Enums\FormRespondentTypeEnum;
 use App\Enums\FormTypeEnum;
 use App\Helpers\ApiHelper;
 use App\Helpers\FileHelper;
@@ -10,9 +9,9 @@ use App\Helpers\FormHelper;
 use App\Helpers\SemesterApiHelper;
 use App\Helpers\SubjectLectureApiHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Global\Form\CloneFormRequest;
 use App\Http\Requests\Global\Form\StoreFormRequest;
 use App\Http\Requests\Global\Form\UpdateFormRequest;
-use App\Jobs\Report\GenerateAggregatedReports;
 use App\Jobs\Report\GenerateEvaluationReportJob;
 use App\Models\Answer;
 use App\Models\AnswerOption;
@@ -1001,5 +1000,74 @@ class FormController extends Controller
       ->get();
 
     return view('content.form.summary', compact('form', 'questions'));
+  }
+
+  public function clone(CloneFormRequest $request, string $id)
+  {
+    $payload = $request->validated();
+
+    // Ambil source beserta relasi
+    $source = Form::with(['questions' => function ($q) {
+      $q->orderBy('sequence', 'asc')
+        ->with(['options' => function ($o) {
+          $o->orderBy('sequence', 'asc');
+        }]);
+    }])->findOrFail($id);
+
+    $userId = Auth::user()->id;
+
+    $newForm = DB::transaction(function () use ($source, $payload, $userId) {
+      // Clone header form (replicate semua kecuali field yang akan di-set ulang)
+      $cloned = $source->replicate([
+        'id',
+        'code',
+        'title',
+        'description',
+        'start_at',
+        'end_at',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+      ]);
+      $cloned->id          = (string) Str::uuid();
+      $cloned->code        = $payload['code'];
+      $cloned->title       = $payload['title'];
+      $cloned->description = $payload['description'] ?? $source->description;
+      $cloned->start_at    = Carbon::parse($payload['start_at']);
+      $cloned->end_at      = Carbon::parse($payload['end_at']);
+      // “lainnya samakan dengan form yang di-clone”
+      // fields seperti: type, cover_path, cover_file, respondents, session_id, is_even, is_active, created_by (opsional)
+      $cloned->created_by  = $userId ?? $source->created_by;
+      $cloned->is_active   = $source->is_active; // tetap sama
+      $cloned->save();
+
+      // Map ID lama -> baru (kalau suatu saat perlu)
+      $questionIdMap = [];
+
+      foreach ($source->questions as $q) {
+        $newQ = $q->replicate(['id', 'm_form_id', 'created_at', 'updated_at']);
+        $newQ->id        = (string) Str::uuid();
+        $newQ->m_form_id = $cloned->id;
+        $newQ->save();
+
+        $questionIdMap[$q->id] = $newQ->id;
+
+        // Clone options hanya untuk tipe checkbox & option
+        if (in_array($q->type, ['checkbox', 'option'], true)) {
+          foreach ($q->options as $opt) {
+            $newOpt = $opt->replicate(['id', 'm_question_id', 'created_at', 'updated_at']);
+            $newOpt->id            = (string) Str::uuid();
+            $newOpt->m_question_id = $newQ->id;
+            $newOpt->save();
+          }
+        }
+      }
+
+      return $cloned;
+    });
+
+    return redirect()
+      ->route('form.show', $newForm->id)
+      ->with('success', 'Form berhasil di-clone.');
   }
 }

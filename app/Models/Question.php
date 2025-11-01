@@ -10,22 +10,27 @@ class Question extends Model
 {
   use HasFactory, HasUuids;
 
-    protected $table = 'm_question';
-    protected $fillable = [
-      'question',
-      'type',
-      'sequence',
-      'is_required',
-      'm_form_id'
-    ];
+  protected $table = 'm_question';
+  protected $fillable = [
+    'question',
+    'type',
+    'sequence',
+    'is_required',
+    'm_form_id'
+  ];
 
-    public function options()
-    {
-        return $this->hasMany(QuestionOption::class, 'm_question_id')->orderBy('sequence', 'asc');
-    }
+  public function form()
+  {
+    return $this->belongsTo(Form::class, 'm_form_id');
+  }
 
-    public function answers()
-    {
-        return $this->hasMany(Answer::class, 'm_question_id');
-    }
+  public function options()
+  {
+    return $this->hasMany(QuestionOption::class, 'm_question_id')->orderBy('sequence', 'asc');
+  }
+
+  public function answers()
+  {
+    return $this->hasMany(Answer::class, 'm_question_id');
+  }
 }
