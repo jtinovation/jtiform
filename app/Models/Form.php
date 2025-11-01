@@ -24,7 +24,10 @@ class Form extends Model
     'is_active',
     'start_at',
     'end_at',
-    'respondents'
+    'respondents',
+    'session_id',
+    'is_even',
+    'created_by',
   ];
 
   protected $casts = [
@@ -46,5 +49,10 @@ class Form extends Model
   public function reports()
   {
     return $this->hasMany(Report::class, 'm_form_id', 'id');
+  }
+
+  public function creator()
+  {
+    return $this->belongsTo(User::class, 'created_by', 'id');
   }
 }

@@ -52,14 +52,38 @@ class FormController extends Controller
   public function index(Request $request)
   {
     $search = $request->input('search');
+
+    $ownerId = null;
+    $majorId = null;
+    $studyProgramId = null;
+    $user = Auth::user();
+    if ($user->hasAnyRole('kajur|kaprodi')) {
+      $ownerId = $user->id;
+      $majorId = $user->major_id;
+      $studyProgramId = $user->study_program_id;
+    }
+
     $forms = Form::query()
       ->withTrashed()
+      ->with('creator:id,name')
       ->when($search, function ($query, $search) {
         return $query->where(function ($q) use ($search) {
           $q->where('title', 'like', "%{$search}%")
             ->orWhere('type', 'like', "%{$search}%")
-            ->orWhere('code', 'like', "%{$search}%");
+            ->orWhere('code', 'like', "%{$search}%")
+            ->orWhereHas('creator', function ($q2) use ($search) {
+              $q2->where('name', 'like', "%{$search}%");
+            });
         });
+      })
+      ->when($ownerId, function ($query) use ($ownerId, $majorId, $studyProgramId, $user) {
+        return $query->where(function ($q) use ($ownerId, $majorId) {
+          $q->where('created_by', $ownerId)
+            ->orWhereJsonContains('respondents->major_id', $majorId);
+        })
+          ->when($user->hasAnyRole('kaprodi'), function ($query) use ($studyProgramId) {
+            return $query->whereJsonContains('respondents->study_program_id', $studyProgramId);
+          });
       })
       ->orderBy('created_at', 'desc')
       ->paginate(10)
@@ -93,7 +117,8 @@ class FormController extends Controller
       'end_at' => $validated['end_at'],
       'cover_path' => $validated['cover_path'] ?? null,
       'cover_file' => $validated['cover_file'] ?? null,
-      'respondents' => $respondents
+      'respondents' => $respondents,
+      'created_by' => Auth::user()->id,
     ]);
 
     return redirect()->route('form.index')->with('success', 'Form berhasil dibuat.');

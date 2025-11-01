@@ -122,7 +122,11 @@
       "slug": "form.index",
       "roles": [
         "superadmin",
-        "admin"
+        "admin",
+        "direktur",
+        "wadir",
+        "kajur",
+        "kaprodi"
       ]
     }
   ]

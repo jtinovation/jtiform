@@ -82,9 +82,11 @@
                                 <option value="" disabled selected>-- Pilih Tipe --</option>
                                 <option value="{{ FormTypeEnum::GENERAL }}"
                                     {{ old('type') == FormTypeEnum::GENERAL->value ? 'selected' : '' }}>Umum</option>
-                                <option value="{{ FormTypeEnum::LECTURE_EVALUATION }}"
-                                    {{ old('type') == FormTypeEnum::LECTURE_EVALUATION->value ? 'selected' : '' }}>
-                                    Evaluasi Dosen</option>
+                                @notrole('kaprodi')
+                                    <option value="{{ FormTypeEnum::LECTURE_EVALUATION }}"
+                                        {{ old('type') == FormTypeEnum::LECTURE_EVALUATION->value ? 'selected' : '' }}>
+                                        Evaluasi Dosen</option>
+                                @endnotrole
                             </select>
                             <label for="type">Tipe</label>
                             @error('type')
@@ -123,10 +125,14 @@
                     <div class="col-md-12">
                         <div class="form-floating form-floating-outline">
                             <select name="responden_type" id="responden_type"
-                                class="form-select @error('responden_type') is-invalid @enderror">
+                                class="form-select @error('responden_type') is-invalid @enderror" autocomplete="off">
                                 <option value="" disabled selected>-- Pilih Tipe Responden --</option>
-                                <option value="{{ FormRespondentTypeEnum::ALL }}">Semua Jurusan</option>
-                                <option value="{{ FormRespondentTypeEnum::MAJOR }}">Jurusan</option>
+                                @notrole('kajur|kaprodi')
+                                    <option value="{{ FormRespondentTypeEnum::ALL }}">Semua Jurusan</option>
+                                @endnotrole
+                                @notrole('kaprodi')
+                                    <option value="{{ FormRespondentTypeEnum::MAJOR }}">Jurusan</option>
+                                @endnotrole
                                 <option value="{{ FormRespondentTypeEnum::STUDY_PROGRAM }}">Program Studi
                                 </option>
                                 <option value="{{ FormRespondentTypeEnum::STUDENT }}">Spesifik Mahasiswa</option>

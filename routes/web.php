@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
   Route::get('/dashboard/my', [HomeController::class, 'myDashboard'])->name('dashboard.my');
 
   Route::prefix('form')->group(function () {
-    Route::middleware('role:superadmin|admin')->group(function () {
+    Route::middleware('role:superadmin|admin|direktur|wadir|kajur|kaprodi')->group(function () {
       Route::get('/', [FormController::class, 'index'])->name('form.index');
       Route::get('/create', [FormController::class, 'create'])->name('form.create');
       Route::post('/store', [FormController::class, 'store'])->name('form.store');
@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/question/{questionId}/texts', [FormSummaryController::class, 'questionTexts'])->name('form.summary.question.texts');
       });
 
-      Route::middleware('role:superadmin|admin')->group(function () {
+      Route::middleware('role:superadmin|admin|direktur|wadir|kajur|kaprodi')->group(function () {
         Route::get('/', [FormController::class, 'show'])->name('form.show');
         Route::get('/edit', [FormController::class, 'edit'])->name('form.edit');
         Route::put('/', [FormController::class, 'update'])->name('form.update');
@@ -72,7 +72,7 @@ Route::middleware('auth')->group(function () {
       });
     });
 
-    Route::prefix('/{id}/questions')->middleware('role:superadmin|admin')->group(function () {
+    Route::prefix('/{id}/questions')->middleware('role:superadmin|admin|direktur|wadir|kajur|kaprodi')->group(function () {
       Route::get('/', [QuestionController::class, 'index'])->name('form.question.index');
       Route::get('/create', [QuestionController::class, 'create'])->name('form.question.create');
       Route::post('/store', [QuestionController::class, 'store'])->name('form.question.store');

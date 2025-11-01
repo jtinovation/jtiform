@@ -15,7 +15,20 @@ class SuperAppApiController extends Controller
 {
   public function majorOption()
   {
-    $majors = MajorApiHelper::getAsOptions(Auth::user()->token);
+    $user = Auth::user();
+    $majors = MajorApiHelper::getAsOptions($user->token);
+
+    if ($user->hasAnyRole('kajur|kaprodi')) {
+      if (!empty($user->major_id)) {
+        $majors['data'] = array_values(array_filter(
+          $majors['data'],
+          function ($major) use ($user) {
+            return $major['value'] == $user->major_id;
+          }
+        ));
+      }
+    }
+
     return $majors;
   }
 

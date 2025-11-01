@@ -8,6 +8,7 @@
 
 @php
     use App\Enums\FormTypeEnum;
+    use App\Enums\FormRespondentTypeEnum;
 @endphp
 
 @section('content')
@@ -53,6 +54,8 @@
                         <th>Kode</th>
                         <th>Nama</th>
                         <th>Tipe</th>
+                        <th>Reponden</th>
+                        <th>Creator</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -71,7 +74,13 @@
                                 @endif
                             </td>
                             <td>
-                                {{ $form->type }}
+                                {{ $form->type === FormTypeEnum::LECTURE_EVALUATION->value ? 'Evaluasi Dosen' : 'Umum' }}
+                            </td>
+                            <td>
+                                {{ FormRespondentTypeEnum::from($form->respondents['type'])->label() }}
+                            </td>
+                            <td>
+                                {{ $form->creator?->name ?? '-' }}
                             </td>
                             <td>
                                 <div class="dropdown">
