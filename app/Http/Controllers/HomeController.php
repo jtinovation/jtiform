@@ -37,6 +37,7 @@ class HomeController extends Controller
     $questionStackChart = null;
     $lectureReportData = null;
     $reports = null;
+    $submissions = null;
 
     if (Auth::user()->hasAnyRole('superadmin|admin|direktur|wadir|kajur|kaprodi')) {
       $filter = [
@@ -65,6 +66,10 @@ class HomeController extends Controller
       });
     }
 
+    if ($user->hasAllRoles('student')) {
+      $submissions = FormHelper::formHistory($req);
+    }
+
     return view('content.dashboard.dashboard-main', compact(
       'activeForm',
       'sessions',
@@ -74,7 +79,8 @@ class HomeController extends Controller
       'questionStackChart',
       'lectureReportData',
       'user',
-      'reports'
+      'reports',
+      'submissions',
     ));
   }
 

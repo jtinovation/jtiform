@@ -210,19 +210,7 @@ class FormController extends Controller
 
   public function history(Request $request)
   {
-    $search = $request->query('search');
-
-    $submissions = Submission::where('m_user_id', Auth::user()->id)
-      ->with('form')
-      ->when($search, function ($query, $search) {
-        return $query->whereHas('form', function ($q) use ($search) {
-          $q->where('title', 'like', "%{$search}%")
-            ->orWhere('code', 'like', "%{$search}%");
-        });
-      })
-      ->orderBy('created_at', 'desc')
-      ->paginate(10)
-      ->withQueryString();
+    $submissions = FormHelper::formHistory($request);
 
     return view('content.form.history', compact('submissions'));
   }

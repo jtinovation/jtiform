@@ -31,6 +31,10 @@
             </div>
         @endif
 
+        @role('student')
+            @include('content.dashboard.partials.active-form')
+        @endrole
+
         @role('superadmin|admin|direktur|wadir|kajur|kaprodi')
             @include('content.dashboard.partials.filter')
             @include('content.dashboard.partials.kpis')

@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Enums\FormRespondentTypeEnum;
 use App\Models\Form;
+use App\Models\Submission;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -273,5 +274,24 @@ class FormHelper
     $b = Carbon::parse($maxAt)->translatedFormat('d M Y');
     if ($a && $b) return "{$a} – {$b}";
     return $a ?: $b;
+  }
+
+  public static function formHistory(Request $request): LengthAwarePaginator
+  {
+    $search = $request->query('search');
+
+    $submissions = Submission::where('m_user_id', Auth::user()->id)
+      ->with('form')
+      ->when($search, function ($query, $search) {
+        return $query->whereHas('form', function ($q) use ($search) {
+          $q->where('title', 'like', "%{$search}%")
+            ->orWhere('code', 'like', "%{$search}%");
+        });
+      })
+      ->orderBy('created_at', 'desc')
+      ->paginate(10)
+      ->withQueryString();
+
+    return $submissions;
   }
 }
