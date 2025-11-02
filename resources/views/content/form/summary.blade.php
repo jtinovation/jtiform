@@ -482,78 +482,180 @@
                 }
             }
 
-            // Render chart pilihan (pie jika opsi <= 6, else bar)
+            function jtBrandPalette(n) {
+                const base = [
+                    '#5766da', '#6f7cf0', '#4cb8ff', '#22d3ee', '#34d399', '#a3e635',
+                    '#fbbf24', '#f59e0b', '#ef4444', '#ec4899', '#a78bfa', '#8b5cf6'
+                ];
+                return base.slice(0, Math.max(1, Math.min(n, base.length)));
+            }
+
+            // ===== Render chart pilihan (DONUT jika opsi <= 6 agar label tidak numpuk, else BAR) =====
             function renderChoiceChart(elId, s) {
                 const el = document.getElementById(elId);
                 if (!el) return;
 
                 // destroy existing
-                if (apexRefs[elId]) {
-                    apexRefs[elId].destroy();
-                    delete apexRefs[elId];
+                if (!window.apexRefs) window.apexRefs = {};
+                if (window.apexRefs[elId]) {
+                    window.apexRefs[elId].destroy();
+                    delete window.apexRefs[elId];
                 }
 
                 const labels = s?.labels || [];
                 const counts = s?.counts || [];
-                const total = counts.reduce((a, b) => a + b, 0);
+                const total = counts.reduce((a, b) => a + (Number(b) || 0), 0);
 
                 if (!labels.length) {
                     el.innerHTML = '<div class="text-muted">Tidak ada data</div>';
                     return;
                 }
 
-                const isPie = labels.length <= 6;
+                const isDonut = labels.length <= 6; // ganti ke DONUT untuk keterbacaan
+                const colors = jtBrandPalette(labels.length);
 
-                const options = isPie ? {
+                const primary = '#5766da';
+                const primaryLight = '#6f7cf0';
+                const fore = '#4b5563';
+                const axis = '#cbd5e1';
+                const grid = '#e2e8f0';
+
+                const options = isDonut ? {
                     chart: {
-                        type: 'pie',
-                        height: 260
+                        type: 'donut',
+                        height: 260,
+                        foreColor: fore,
+                        fontFamily: 'Inter, sans-serif'
                     },
                     series: counts,
                     labels: labels,
+                    colors: colors,
+
+                    // Garis pemisah slice tebal agar kontras
+                    stroke: {
+                        colors: ['#fff'],
+                        width: 6
+                    },
+
+                    // Matikan label di dalam slice (biar tidak berantakan)
                     dataLabels: {
-                        enabled: true,
-                        formatter: (val, opt) => {
-                            const c = counts[opt.seriesIndex] || 0;
-                            const pct = total ? (c * 100 / total).toFixed(1) : 0;
-                            return `${c} (${pct}%)`;
+                        enabled: false
+                    },
+
+                    // Tampilkan nilai di tengah donut (nama slice aktif, value, dan total)
+                    plotOptions: {
+                        pie: {
+                            expandOnClick: false,
+                            donut: {
+                                size: '68%',
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        offsetY: 10,
+                                        color: '#334155'
+                                    },
+                                    value: {
+                                        show: true,
+                                        fontSize: '18px',
+                                        fontWeight: 700,
+                                        color: '#111827',
+                                        formatter: (val) => String(val ?? 0)
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: 'Total',
+                                        color: '#334155',
+                                        fontWeight: 600,
+                                        formatter: () => String(total)
+                                    }
+                                }
+                            }
                         }
                     },
+
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            colors: '#111827'
+                        },
+                        markers: {
+                            radius: 12
+                        }
                     },
+
                     tooltip: {
+                        theme: 'light',
+                        fillSeriesColor: false,
                         y: {
-                            formatter: (val) => val
+                            formatter: (val) => {
+                                const c = Number(val) || 0;
+                                const pct = total ? (c * 100 / total).toFixed(1) : 0;
+                                return `${c} (${pct}%)`;
+                            }
                         }
                     }
                 } : {
                     chart: {
                         type: 'bar',
-                        height: 280
+                        height: 280,
+                        foreColor: fore,
+                        fontFamily: 'Inter, sans-serif'
                     },
                     series: [{
                         name: 'Jumlah',
                         data: counts
                     }],
+                    colors: colors,
                     xaxis: {
-                        categories: labels
+                        categories: labels,
+                        axisTicks: {
+                            color: grid
+                        },
+                        axisBorder: {
+                            color: axis
+                        },
+                        labels: {
+                            rotate: -15,
+                            trim: true,
+                            style: {
+                                colors: '#475569',
+                                fontSize: '12px'
+                            }
+                        }
                     },
                     plotOptions: {
                         bar: {
                             borderRadius: 4,
-                            columnWidth: '45%'
+                            columnWidth: '45%',
+                            distributed: true // tiap bar warna berbeda dari palet
+                        }
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shade: 'light',
+                            type: 'vertical',
+                            gradientToColors: labels.map(() => primaryLight),
+                            opacityFrom: 0.95,
+                            opacityTo: 0.9,
+                            stops: [0, 100]
                         }
                     },
                     dataLabels: {
                         enabled: false
                     },
+                    grid: {
+                        borderColor: grid,
+                        strokeDashArray: 3
+                    },
                     tooltip: {
+                        theme: 'light',
                         y: {
-                            formatter: (val, {
-                                dataPointIndex
-                            }) => {
-                                const c = val ?? 0;
+                            formatter: (val) => {
+                                const c = Number(val) || 0;
                                 const pct = total ? (c * 100 / total).toFixed(1) : 0;
                                 return `${c} (${pct}%)`;
                             }
@@ -561,20 +663,27 @@
                     },
                     noData: {
                         text: 'Tidak ada data'
+                    },
+                    legend: {
+                        show: false
                     }
                 };
 
                 const chart = new ApexCharts(el, options);
                 chart.render();
-                apexRefs[elId] = chart;
+                window.apexRefs[elId] = chart;
 
-                // legend ringkas (pakai elemen *_legend yang sudah ada)
+                // Legend ringkas di luar chart (pakai elemen *_legend jika ada)
                 const legendEl = document.getElementById(`${elId}_legend`);
                 if (legendEl) {
                     const html = labels.map((l, i) => {
                         const c = counts[i] ?? 0;
                         const pct = total ? (c * 100 / total).toFixed(1) : 0;
-                        return `<span class="me-3"><strong>${esc(l)}</strong>: ${c} (${pct}%)</span>`;
+                        const swatch =
+                            `<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[i % colors.length]};margin-right:6px;vertical-align:middle;"></span>`;
+                        // gunakan window.esc jika ada, untuk sanitasi
+                        const safeLabel = (window.esc ? esc(l) : l);
+                        return `<span class="me-3">${swatch}<strong>${safeLabel}</strong>: ${c} (${pct}%)</span>`;
                     }).join('');
                     legendEl.innerHTML = html || '<span class="text-muted">Tidak ada data</span>';
                 }

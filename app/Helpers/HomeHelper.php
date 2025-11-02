@@ -478,7 +478,7 @@ class HomeHelper
     // ===== Bar Chart: Rata-rata per Matakuliah (dari selected report_details) =====
     // Gunakan kode matkul + kelas sebagai label
     $courseBar = [
-      'labels' => $courses->map(fn($c) => ($c['class'] ?? '') . ' ' . ($c['course_code'] ?? ''))->values(),
+      'labels' => $courses->map(fn($c) => ($c['class'] ?? '') . ' ' . ($c['course_name'] ?? ''))->values(),
       'data'   => $courses->map(fn($c) => round((float)($c['average_score'] ?? 0), 2))->values(), // 0-100
     ];
 

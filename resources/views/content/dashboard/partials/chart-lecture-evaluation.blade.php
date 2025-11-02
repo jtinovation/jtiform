@@ -187,69 +187,146 @@
 @push('page-script')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-
             const chartLabels = @json($lectureReportData['reportChartData']['chartLabels']);
             const chartData = @json($lectureReportData['reportChartData']['chartData']);
             const chartPredicates = @json($lectureReportData['reportChartData']['chartPredicates']);
 
-            if (!document.querySelector('#reportChart')) return;
-
-            const options = {
-                chart: {
-                    type: 'area',
-                    height: 350,
-                    toolbar: {
-                        show: true
-                    }
-                },
-                series: [{
-                    name: 'Nilai Rata-Rata',
-                    data: chartData
-                }],
-                xaxis: {
-                    categories: chartLabels,
-                    title: {
-                        text: 'Periode Evaluasi'
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Nilai (Skala 100)'
-                    },
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(value, {
-                            series,
-                            seriesIndex,
-                            dataPointIndex,
-                            w
-                        }) {
-                            const predicate = chartPredicates[dataPointIndex];
-                            return `${value} (Predikat: ${predicate})`;
-                        }
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                },
-            };
-            const chart = new ApexCharts(document.querySelector("#reportChart"), options);
-            chart.render();
-
-            // Bar per Matakuliah
             const courseLabels = @json($lectureReportData['courseBar']['labels']);
             const courseData = @json($lectureReportData['courseBar']['data']);
-            if (document.querySelector("#courseBarChart")) {
+
+            const qShort = @json($lectureReportData['questionBar']['labels']); // ["P1", "P2", ...]
+            const qFull = @json($lectureReportData['questionBar']['fullLabels']); // ["1. ...", ...]
+            const qData = @json($lectureReportData['questionBar']['data']); // [.. 0-100 ..]
+
+            const primary = '#5766da';
+            const primaryLight = '#6f7cf0';
+            const fore = '#4b5563'; // label text
+            const axis = '#cbd5e1'; // axis border
+            const grid = '#e2e8f0'; // grid line
+
+            // ========= Area: Nilai Rata-Rata per Periode =========
+            if (document.querySelector('#reportChart')) {
+                const options = {
+                    chart: {
+                        type: 'area',
+                        height: 350,
+                        toolbar: {
+                            show: true
+                        },
+                        foreColor: fore,
+                        fontFamily: 'Inter, sans-serif'
+                    },
+                    series: [{
+                        name: 'Nilai Rata-Rata',
+                        data: chartData
+                    }],
+                    colors: [primary],
+                    stroke: {
+                        curve: 'smooth',
+                        width: 3
+                    },
+                    markers: {
+                        size: 4,
+                        strokeWidth: 2,
+                        strokeColors: '#fff',
+                        colors: [primary]
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shade: 'light',
+                            type: 'vertical',
+                            gradientToColors: [primaryLight],
+                            opacityFrom: 0.35,
+                            opacityTo: 0.05,
+                            stops: [0, 100]
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            colors: ['#334155']
+                        },
+                        formatter: (v) => (v ?? 0).toFixed(2)
+                    },
+                    xaxis: {
+                        categories: chartLabels,
+                        title: {
+                            text: 'Periode Evaluasi',
+                            style: {
+                                color: '#334155',
+                                fontWeight: 500
+                            }
+                        },
+                        axisTicks: {
+                            color: grid
+                        },
+                        axisBorder: {
+                            color: axis
+                        },
+                        labels: {
+                            style: {
+                                colors: '#475569'
+                            }
+                        }
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Nilai (Skala 100)',
+                            style: {
+                                color: '#334155',
+                                fontWeight: 500
+                            }
+                        },
+                        labels: {
+                            style: {
+                                colors: '#475569'
+                            }
+                        }
+                    },
+                    grid: {
+                        borderColor: grid,
+                        strokeDashArray: 3
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        y: {
+                            formatter: function(value, {
+                                dataPointIndex
+                            }) {
+                                const predicate = chartPredicates?.[dataPointIndex] ?? '-';
+                                const v = (value ?? 0).toFixed(2);
+                                return `${v} (Predikat: ${predicate})`;
+                            }
+                        },
+                        marker: {
+                            show: true,
+                            fillColors: [primary]
+                        }
+                    },
+                    legend: {
+                        show: false
+                    }
+                };
+                new ApexCharts(document.querySelector('#reportChart'), options).render();
+            }
+
+            // ========= Bar Horizontal: Rata-rata per Matakuliah =========
+            if (document.querySelector('#courseBarChart')) {
                 const barOpt = {
                     chart: {
                         type: 'bar',
-                        height: Math.max(320, 40 + (courseLabels.length * 28))
+                        height: Math.max(320, 40 + (courseLabels.length * 28)),
+                        foreColor: fore,
+                        fontFamily: 'Inter, sans-serif'
                     },
                     series: [{
                         name: 'Rata-rata',
                         data: courseData
                     }],
+                    colors: [primary],
                     plotOptions: {
                         bar: {
                             horizontal: true,
@@ -257,6 +334,17 @@
                             dataLabels: {
                                 position: 'center'
                             }
+                        }
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shade: 'light',
+                            type: 'horizontal',
+                            gradientToColors: [primaryLight],
+                            opacityFrom: 0.95,
+                            opacityTo: 0.95,
+                            stops: [0, 100]
                         }
                     },
                     dataLabels: {
@@ -273,84 +361,164 @@
                         categories: courseLabels,
                         tickAmount: 5,
                         title: {
-                            text: '0–100'
+                            text: '0–100',
+                            style: {
+                                color: '#334155',
+                                fontWeight: 500
+                            }
+                        },
+                        axisTicks: {
+                            color: grid
+                        },
+                        axisBorder: {
+                            color: axis
+                        },
+                        labels: {
+                            style: {
+                                colors: '#475569'
+                            }
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            style: {
+                                colors: '#475569'
+                            }
                         }
                     },
                     grid: {
+                        borderColor: grid,
                         strokeDashArray: 3
                     },
                     tooltip: {
+                        theme: 'light',
                         y: {
                             formatter: (v) => (v ?? 0).toFixed(2)
+                        },
+                        marker: {
+                            show: true,
+                            fillColors: [primary]
                         }
                     },
+                    legend: {
+                        show: false
+                    }
                 };
-                new ApexCharts(document.querySelector("#courseBarChart"), barOpt).render();
+                new ApexCharts(document.querySelector('#courseBarChart'), barOpt).render();
             }
 
-            // === Bar Horizontal per Pertanyaan (P1, P2, ...) ===
-            const qShort = @json($lectureReportData['questionBar']['labels']); // ["P1","P2",...]
-            const qFull = @json($lectureReportData['questionBar']['fullLabels']); // ["1. Pertanyaan lengkap...", ...]
-            const qData = @json($lectureReportData['questionBar']['data']); // [.. 0-100 ..]
-
-            if (document.querySelector("#questionBarChart")) {
+            // ========= Bar Vertikal: Rata-rata per Pertanyaan (P1, P2, ...) =========
+            if (document.querySelector('#questionBarChart')) {
                 const qOpt = {
                     chart: {
                         type: 'bar',
                         height: Math.max(360, 40 + (qShort.length * 28)),
                         toolbar: {
                             show: true
-                        }
+                        },
+                        foreColor: fore,
+                        fontFamily: 'Inter, sans-serif'
                     },
                     series: [{
                         name: 'Rata-rata',
                         data: qData
                     }],
+                    colors: [primary],
                     plotOptions: {
                         bar: {
                             horizontal: false,
                             borderRadius: 6,
                             dataLabels: {
-                                position: 'right'
-                            }
+                                position: 'top'
+                            },
+                            columnWidth: '55%'
+                        }
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shade: 'light',
+                            type: 'vertical',
+                            gradientToColors: [primaryLight],
+                            opacityFrom: 0.95,
+                            opacityTo: 0.9,
+                            stops: [0, 100]
                         }
                     },
                     dataLabels: {
                         enabled: true,
-                        formatter: (v) => (v ?? 0).toFixed(2)
+                        formatter: (v) => (v ?? 0).toFixed(2),
+                        offsetY: -16,
+                        style: {
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            colors: ['#334155']
+                        }
                     },
                     xaxis: {
                         categories: qShort,
                         labels: {
-                            show: true
+                            style: {
+                                colors: '#475569'
+                            }
+                        },
+                        axisTicks: {
+                            color: grid
+                        },
+                        axisBorder: {
+                            color: axis
                         }
                     },
                     yaxis: {
                         labels: {
-                            show: true
+                            style: {
+                                colors: '#475569'
+                            }
                         }
                     },
                     tooltip: {
                         shared: false,
                         intersect: false,
+                        theme: 'light',
                         x: {
                             formatter: function(val, opts) {
                                 const idx = opts?.dataPointIndex ?? 0;
-                                return qFull[idx] || val;
+                                return qFull?.[idx] || val;
                             }
                         },
                         y: {
                             formatter: (v) => (v ?? 0).toFixed(2)
+                        },
+                        marker: {
+                            show: true,
+                            fillColors: [primary]
                         }
                     },
                     grid: {
+                        borderColor: grid,
                         strokeDashArray: 3
                     },
                     legend: {
                         show: false
-                    }
+                    },
+                    responsive: [{
+                        breakpoint: 576,
+                        options: {
+                            plotOptions: {
+                                bar: {
+                                    columnWidth: '70%'
+                                }
+                            },
+                            dataLabels: {
+                                offsetY: -12,
+                                style: {
+                                    fontSize: '11px'
+                                }
+                            }
+                        }
+                    }]
                 };
-                new ApexCharts(document.querySelector("#questionBarChart"), qOpt).render();
+                new ApexCharts(document.querySelector('#questionBarChart'), qOpt).render();
             }
         });
     </script>

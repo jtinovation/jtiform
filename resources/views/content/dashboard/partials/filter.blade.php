@@ -9,11 +9,30 @@
                     <div class="col-md-3">
                         <label class="form-label mb-1">Tahun Akademik</label>
                         <select class="form-select" name="session_id">
-                            <option value="">Terbaru</option>
+                            @php
+                                $requestedSessionId = request('session_id');
+                                $hasSelected = false;
+                            @endphp
                             @foreach ($sessions as $session)
-                                <option value="{{ $session['value'] }}"
-                                    {{ request('session_id') == $session['value'] ? 'selected' : '' }}>
-                                    {{ $session['label'] }}
+                                @php
+                                    $isActive = !empty($session['is_active']);
+                                    $selectThis = false;
+
+                                    if (!$hasSelected) {
+                                        if ($requestedSessionId !== null && $requestedSessionId !== '') {
+                                            $selectThis = (string) $requestedSessionId === (string) $session['value'];
+                                        } elseif ($isActive) {
+                                            $selectThis = true;
+                                        }
+                                        if ($selectThis) {
+                                            $hasSelected = true;
+                                        }
+                                    }
+                                @endphp
+                                <option value="{{ $session['value'] }}" {{ $selectThis ? 'selected' : '' }}>
+                                    {{ $session['label'] }}@if ($isActive)
+                                        — Aktif
+                                    @endif
                                 </option>
                             @endforeach
                         </select>
@@ -23,7 +42,6 @@
                     <div class="col-md-3">
                         <label class="form-label mb-1">Semester</label>
                         <select class="form-select" name="is_even">
-                            <option value="">Semua</option>
                             <option value="0" {{ request('is_even') === '0' ? 'selected' : '' }}>Ganjil</option>
                             <option value="1" {{ request('is_even') === '1' ? 'selected' : '' }}>Genap</option>
                         </select>
