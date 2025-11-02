@@ -12,6 +12,7 @@ use App\Http\Controllers\Global\StudyProgramController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Lecture\EvaluationController;
 use App\Http\Controllers\Global\EvaluationController as GlobalEvaluationController;
+use App\Http\Controllers\Lecture\SignatureController;
 
 Route::get('/', function () {
   return redirect()->route('login');
@@ -106,5 +107,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/student/option', [SuperAppApiController::class, 'studentOption'])->name('api.student.option');
     Route::get('/staff/option', [SuperAppApiController::class, 'staffOption'])->name('api.staff.option');
     Route::get('/session/option', [SuperAppApiController::class, 'sessionOption'])->name('api.session.option');
+  });
+
+  Route::prefix('signature')->group(function () {
+    Route::get('/', [SignatureController::class, 'index'])->name('signature.index');
+    Route::post('/store', [SignatureController::class, 'store'])->name('signature.store');
   });
 });

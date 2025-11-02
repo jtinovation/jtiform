@@ -128,6 +128,20 @@
         "kajur",
         "kaprodi"
       ]
+    },
+    {
+      "menuHeader": "Tanda Tangan"
+    },
+    {
+      "url": "/signature",
+      "name": "Upload Tanda Tangan",
+      "icon": "menu-icon tf-icons ri-pencil-line",
+      "slug": "signature.index",
+      "roles": [
+        "superadmin",
+        "admin",
+        "kajur"
+      ]
     }
   ]
 }
