@@ -28,9 +28,9 @@
                             aria-label="Login melalui SSO kampus">
                             <i class="ti ti-login me-2"></i> Login SSO
                         </a>
-                        <a href="#contoh-form" class="btn btn-outline-light btn-lg px-4">
+                        {{-- <a href="#contoh-form" class="btn btn-outline-light btn-lg px-4">
                             <i class="ti ti-eye me-2"></i> Lihat Contoh Form
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
 
@@ -185,8 +185,7 @@
         </div>
     </section>
 
-    {{-- SHOWCASE / CONTOH FORM --}}
-    <section class="py-5" id="contoh-form">
+    {{-- <section class="py-5" id="contoh-form">
         <div class="container">
             <div class="text-center mb-4">
                 <h2 class="mb-1">Cuplikan UI</h2>
@@ -220,7 +219,6 @@
         </div>
     </section>
 
-    {{-- STATS --}}
     <section class="py-5 bg-body-tertiary">
         <div class="container">
             <div class="row g-4 text-center">
@@ -245,7 +243,7 @@
                 <small class="text-muted mt-2">*estimasi target operasional</small>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     {{-- FAQ --}}
     <section class="py-5" id="faq">
