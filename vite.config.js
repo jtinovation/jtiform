@@ -39,6 +39,8 @@ const LibsCssFiles = GetFilesArray('resources/assets/vendor/libs/**/*.css');
 // Processing Fonts Scss Files
 const FontsScssFiles = GetFilesArray('resources/assets/vendor/fonts/**/!(_)*.scss');
 
+const assetImageFiles = GetFilesArray('resources/assets/images/**/*.*');
+
 export default defineConfig({
   plugins: [
     laravel({
@@ -52,7 +54,8 @@ export default defineConfig({
         ...CoreScssFiles,
         ...LibsScssFiles,
         ...LibsCssFiles,
-        ...FontsScssFiles
+        ...FontsScssFiles,
+        ...assetImageFiles
       ],
       refresh: true
     }),
