@@ -14,7 +14,7 @@ class OAuthController extends Controller
 {
   public function redirect()
   {
-    return redirect(config('app.super_app_url') . '/oauth/authorize?client_id=' . env('OAUTH_CLIENT_ID') . '&redirect_uri=' . route('auth.callback') . '&response_type=code');
+    return redirect(config('app.super_app_url') . '/oauth/authorize?client_id=' . env('OAUTH_CLIENT_ID') . '&redirect_uri=' . config('app.url') . '/auth/callback&response_type=code');
   }
 
   public function callback(Request $request)
