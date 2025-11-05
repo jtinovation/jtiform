@@ -12,6 +12,7 @@ use App\Http\Controllers\Global\StudyProgramController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Lecture\EvaluationController;
 use App\Http\Controllers\Global\EvaluationController as GlobalEvaluationController;
+use App\Http\Controllers\Global\SubjectController;
 use App\Http\Controllers\Lecture\SignatureController;
 
 Route::get('/', function () {
@@ -99,6 +100,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/evaluation/data', [StudyProgramController::class, 'getDataReportProgram'])->name('study.program.evaluation.data');
     Route::post('/evaluation/generate', [StudyProgramController::class, 'generateData'])->name('study.program.evaluation.generate');
     Route::post('/evaluation/regenerate', [StudyProgramController::class, 'regenerateData'])->name('study.program.evaluation.regenerate');
+  });
+
+  Route::prefix('subject/evaluation')->group(function () {
+    Route::get('/', [SubjectController::class, 'index'])->name('subject.evaluation.index');
+    Route::get('/data', [SubjectController::class, 'getDataReportSubject'])->name('subject.evaluation.report');
   });
 
   Route::prefix('api')->group(function () {

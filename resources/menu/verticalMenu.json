@@ -73,6 +73,20 @@
       ]
     },
     {
+      "url": "/subject/evaluation",
+      "name": "Rapor Mata Kuliah",
+      "icon": "menu-icon tf-icons ri-file-list-3-line",
+      "slug": "subject.evaluation.index",
+      "roles": [
+        "superadmin",
+        "admin",
+        "direktur",
+        "wadir",
+        "kajur",
+        "kaprodi"
+      ]
+    },
+    {
       "url": "/evaluation",
       "name": "List Rapor",
       "icon": "menu-icon tf-icons ri-file-list-3-line",

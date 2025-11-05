@@ -13,65 +13,22 @@
         <div class="hero__bg" role="img" aria-label="Gedung POLIJE"></div>
         <span class="hero__overlay"></span>
 
-        <div class="container position-relative">
-            <div class="row align-items-center py-5">
-                <div class="col-12 col-lg-7 text-white">
-                    <h1 class="display-5 fw-bold mb-3 text-white">
-                        JTIForm — Evaluasi Dosen & Form Akademik Terintegrasi
-                    </h1>
-                    <p class="lead mb-4">
-                        Kumpulkan penilaian dosen tiap semester dan kelola form umum seperti Google Forms—
-                        semuanya terintegrasi dengan SSO kampus, laporan real-time, dan keamanan terbaik.
-                    </p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('auth.login') }}" class="btn btn-primary btn-lg px-4"
-                            aria-label="Login melalui SSO kampus">
-                            <i class="ti ti-login me-2"></i> Login SSO
-                        </a>
-                        {{-- <a href="#contoh-form" class="btn btn-outline-light btn-lg px-4">
-                            <i class="ti ti-eye me-2"></i> Lihat Contoh Form
-                        </a> --}}
-                    </div>
-                </div>
+        <div class="hero__content container position-relative d-flex flex-column align-items-center justify-content-center">
+            {{-- Judul dengan efek mengetik --}}
+            <h1 class="display-5 fw-bold mb-3 text-white">
+                <span id="typing-title" class="typing-text"></span>
+            </h1>
 
-                <div class="col-12 col-lg-5 mt-5 mt-lg-0">
-                    {{-- Mockup cards ala Materio --}}
-                    <div class="card glass-card mb-3">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between">
-                                <div>
-                                    <h6 class="mb-1 text-white">Evaluasi Dosen Semester Ganjil 2025/2026</h6>
-                                    <small class="text-muted">Teknik Informatika · 32 Kelas</small>
-                                </div>
-                                <span class="badge bg-label-success">Aktif</span>
-                            </div>
-                            <div class="mt-3">
-                                <div class="progress" style="height: 8px" aria-label="Progress pengisian">
-                                    <div class="progress-bar" role="progressbar" style="width: 62%"></div>
-                                </div>
-                                <small class="text-muted d-block mt-1">62% terkumpul</small>
-                            </div>
-                        </div>
-                    </div>
+            {{-- Subjudul dengan efek mengetik --}}
+            <p class="lead mb-4 col-12 col-md-10 col-lg-8">
+                <span id="typing-subtitle" class="typing-text"></span>
+            </p>
 
-                    <div class="card glass-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <h6 class="mb-0 text-white">Survei Kepuasan Layanan</h6>
-                                <span class="badge bg-label-primary">Publik</span>
-                            </div>
-                            {{-- Mini bar chart dummy --}}
-                            <div class="d-flex gap-2 align-items-end" style="height: 72px">
-                                <div class="chart-bar" style="height: 45px"></div>
-                                <div class="chart-bar" style="height: 65px"></div>
-                                <div class="chart-bar" style="height: 32px"></div>
-                                <div class="chart-bar" style="height: 58px"></div>
-                                <div class="chart-bar" style="height: 50px"></div>
-                            </div>
-                            <small class="text-muted">Rata-rata skor minggu ini</small>
-                        </div>
-                    </div>
-                </div>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="{{ route('auth.login') }}" class="btn btn-primary btn-lg px-4"
+                    aria-label="Login melalui SSO kampus">
+                    <i class="ti ti-login me-2"></i> Login SSO
+                </a>
             </div>
         </div>
 
@@ -331,4 +288,35 @@
 
 @push('page-script')
     @vite('resources/assets/js/landing.js')
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const titleEl = document.getElementById("typing-title");
+            const subtitleEl = document.getElementById("typing-subtitle");
+
+            const titleText = "JTIForm Evaluasi Dosen & Form Akademik Terintegrasi";
+            const subtitleText =
+                "Kumpulkan penilaian dosen tiap semester dan kelola form umum seperti Google Forms";
+
+            // Kecepatan ketikan
+            const typeSpeed = 50;
+            const pauseAfterTitle = 800;
+
+            function typeEffect(el, text, callback) {
+                let i = 0;
+                const timer = setInterval(() => {
+                    el.textContent = text.slice(0, i++);
+                    if (i > text.length) {
+                        clearInterval(timer);
+                        if (callback) callback();
+                    }
+                }, typeSpeed);
+            }
+
+            // Jalankan efek: judul dulu → lalu subtitle
+            typeEffect(titleEl, titleText, () => {
+                setTimeout(() => typeEffect(subtitleEl, subtitleText), pauseAfterTitle);
+            });
+        });
+    </script>
 @endpush
