@@ -78,6 +78,18 @@
     </div>
 
     <div class="card mt-4">
+        <div class="row g-2 align-items-center my-3 mx-4">
+            <div class="col-12 col-md">
+                <div class="row g-2 justify-content-md-end">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="input-group input-group-sm">
+                            <input type="search" class="form-control" placeholder="Cari berdasarkan nama" id="search"
+                                name="search" value="{{ request('search') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card-body">
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover" id="table-subject-evaluation">
@@ -111,6 +123,7 @@
             const $prodi = $('#study_program_id');
             const $session = $('#session_id');
             const $semester = $('#semester');
+            const $search = $('#search');
             const $tbody = $('#table-subject-evaluation tbody');
             const $pager = $('#pagination-nav');
             const DEFAULT_PER_PAGE = 10;
@@ -226,7 +239,8 @@
                     study_program_id: $prodi.val(),
                     session_id: $session.val(),
                     semester: $semester.val(),
-                    per_page: DEFAULT_PER_PAGE
+                    per_page: DEFAULT_PER_PAGE,
+                    search: $search.val()
                 }, extra);
             }
 
@@ -299,6 +313,15 @@
                 const semester = $(this).val();
                 if (!majorId || !studyProgramId || !sessionId || !semester) return;
                 loadPage(1); // mulai dari page 1
+            });
+
+            // search with debounce and brings all filters back to page 1
+            let searchTimeout = null;
+            $search.on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadPage(1); // mulai dari page 1
+                }, 500);
             });
 
             // ---------- intercept pagination clicks (delegation)

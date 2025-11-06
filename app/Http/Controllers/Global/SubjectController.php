@@ -29,6 +29,7 @@ class SubjectController extends Controller
     $studyProgramId = $request->input('study_program_id');
     $sessionId = $request->input('session_id');
     $semester = $request->input('semester');
+    $search = $request->input('search', '');
 
     $isEven = $semester == 1 ? 0 : 1;
 
@@ -58,6 +59,12 @@ class SubjectController extends Controller
             SUM(jt.respondents) AS respondent_total,
             ROUND(SUM(jt.average_score * jt.respondents) / NULLIF(SUM(jt.respondents), 0), 2) AS avg_score
         ')
+      ->when($search, function ($query, $search) {
+        $query->where(function ($q) use ($search) {
+          $q->where('jt.course_code', 'like', '%' . $search . '%')
+            ->orWhere('jt.course_name', 'like', '%' . $search . '%');
+        });
+      })
       ->groupBy('jt.course_code', 'jt.course_name')
       ->orderByDesc('avg_score');
 
