@@ -81,6 +81,12 @@
                 if ($list.children('.question-item').length === 0) addQuestion();
             });
 
+            $list.on('click', '.btn-clone-question', function(e) {
+                e.preventDefault();
+                const $card = $(this).closest('.question-item');
+                cloneQuestion($card);
+            });
+
             // Ubah tipe -> tampil/sembunyikan opsi
             $list.on('change', '.field-type', function() {
                 const $card = $(this).closest('.question-item');
@@ -132,23 +138,36 @@
             function addQuestion(prefill = {}) {
                 const idx = counter++;
                 const formId = @json($form->id);
+
+                const q = prefill.question || '';
+                const type = prefill.type || '';
+                const isReq = !!prefill.is_required;
+                const reqAttr = isReq ? 'checked' : '';
+
                 const html = `
       <div class="question-item card shadow-sm" data-index="${idx}">
         <div class="card-header d-flex align-items-center gap-2 py-2">
           <span class="drag-handle" title="Seret untuk mengurutkan">☰</span>
           <strong class="me-auto">Pertanyaan <span class="q-number"></span></strong>
+          <button class="btn btn-sm btn-outline-secondary btn-clone-question" type="button">Clone</button>
           <button class="btn btn-sm btn-outline-danger btn-remove-question" type="button">Hapus</button>
         </div>
 
         <div class="card-body pt-3">
           <input type="hidden" name="questions[${idx}][m_form_id]" value="${formId}">
           <input type="hidden" class="field-sequence" name="questions[${idx}][sequence]" value="0">
-          <!-- tidak ada [id] karena pertanyaan baru -->
 
           <div class="row g-4">
             <div class="col-md-7">
               <div class="form-floating form-floating-outline">
-                <input type="text" class="form-control field-question" name="questions[${idx}][question]" placeholder="Tulis pertanyaan" value="" required>
+                <input
+                  type="text"
+                  class="form-control field-question"
+                  name="questions[${idx}][question]"
+                  placeholder="Tulis pertanyaan"
+                  value="${escapeHtml(q)}"
+                  required
+                >
                 <label>Pertanyaan</label>
               </div>
             </div>
@@ -156,10 +175,10 @@
             <div class="col-md-3">
               <div class="form-floating form-floating-outline">
                 <select class="form-select field-type" name="questions[${idx}][type]" required>
-                  <option value="" selected disabled>-- Pilih Tipe --</option>
-                  <option value="text">Text</option>
-                  <option value="checkbox">Checkbox (multi)</option>
-                  <option value="option">Option (single)</option>
+                  <option value="" ${type === '' ? 'selected' : ''} disabled>-- Pilih Tipe --</option>
+                  <option value="text"      ${type === 'text' ? 'selected' : ''}>Text</option>
+                  <option value="checkbox"  ${type === 'checkbox' ? 'selected' : ''}>Checkbox (multi)</option>
+                  <option value="option"    ${type === 'option' ? 'selected' : ''}>Option (single)</option>
                 </select>
                 <label>Tipe</label>
               </div>
@@ -167,7 +186,13 @@
 
             <div class="col-md-2 d-flex align-items-center">
               <div class="form-check form-switch">
-                <input class="form-check-input field-required" type="checkbox" name="questions[${idx}][is_required]" value="1">
+                <input
+                  class="form-check-input field-required"
+                  type="checkbox"
+                  name="questions[${idx}][is_required]"
+                  value="1"
+                  ${reqAttr}
+                >
                 <label class="form-check-label">Wajib</label>
               </div>
             </div>
@@ -191,12 +216,40 @@
         </div>
       </div>
     `;
+
                 $list.append(html);
                 const $card = $list.children('.question-item').last();
 
-                toggleOptionsBox($card); // default hidden
-                initOptionsSortable($card); // siapkan sortable opsi
+                // === handle options kalau tipe nya pakai opsi ===
+                const typeVal = type || $card.find('.field-type').val();
+                if (typeVal === 'checkbox' || typeVal === 'option') {
+                    const $box = $card.find('.options-box');
+                    const $wrap = $card.find('.options-wrapper');
+
+                    $box.show();
+                    $wrap.empty();
+
+                    if (Array.isArray(prefill.options) && prefill.options.length) {
+                        // dari clone
+                        prefill.options.forEach(function(opt) {
+                            addOptionRow($card, opt.label, opt.point);
+                        });
+                    } else {
+                        // baru biasa
+                        addOptionRow($card, 'Opsi 1', 0);
+                        addOptionRow($card, 'Opsi 2', 0);
+                    }
+
+                    initOptionsSortable($card);
+                    renumberOptionFields($card);
+                } else {
+                    $card.find('.options-box').hide();
+                }
+
+                // supaya kalau user ganti tipe tetap jalan
+                toggleOptionsBox($card);
                 refreshSequencesAndNumbers();
+                $card.find('.field-question').focus().select();
             }
 
             function addOptionRow($card, defaultLabel = '', defaultPoint = 0, existingOptId = null) {
@@ -296,6 +349,31 @@
                 });
             }
 
+            function cloneQuestion($card) {
+                const typeVal = $card.find('.field-type').val();
+
+                const prefill = {
+                    question: $card.find('.field-question').val(),
+                    type: typeVal,
+                    is_required: $card.find('.field-required').is(':checked'),
+                    options: []
+                };
+
+                if (typeVal === 'checkbox' || typeVal === 'option') {
+                    $card.find('.options-wrapper .option-row').each(function() {
+                        const $row = $(this);
+                        const label = $row.find('input[type="text"]').val();
+                        const point = $row.find('input[type="number"]').val();
+                        prefill.options.push({
+                            label,
+                            point
+                        });
+                    });
+                }
+
+                addQuestion(prefill);
+            }
+
             function escapeHtml(str) {
                 if (str == null) return '';
                 return String(str)
@@ -339,6 +417,9 @@
                     <div class="card-header d-flex align-items-center gap-2 py-2">
                         <span class="drag-handle" title="Seret untuk mengurutkan">☰</span>
                         <strong class="me-auto">Pertanyaan <span class="q-number"></span></strong>
+                        <button class="btn btn-sm btn-outline-secondary btn-clone-question" type="button">
+                            Clone
+                        </button>
                         <button class="btn btn-sm btn-outline-danger btn-remove-question" type="button">Hapus</button>
                     </div>
 
