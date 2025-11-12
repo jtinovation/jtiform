@@ -125,23 +125,40 @@
                     <div class="col-md-12">
                         <div class="form-floating form-floating-outline">
                             <select name="responden_type" id="responden_type"
-                                class="form-select @error('responden_type') is-invalid @enderror" autocomplete="off">
+                                class="form-select @error('responden_type') is-invalid @enderror @error('respondent_ids') is-invalid @enderror"
+                                autocomplete="off">
                                 <option value="" disabled selected>-- Pilih Tipe Responden --</option>
                                 @notrole('kajur|kaprodi')
-                                    <option value="{{ FormRespondentTypeEnum::ALL }}">Semua Jurusan</option>
+                                    <option value="{{ FormRespondentTypeEnum::ALL }}"
+                                        {{ old('responden_type') == FormRespondentTypeEnum::ALL->value ? 'selected' : '' }}>
+                                        Semua Jurusan</option>
                                 @endnotrole
                                 @notrole('kaprodi')
-                                    <option value="{{ FormRespondentTypeEnum::MAJOR }}">Jurusan</option>
+                                    <option value="{{ FormRespondentTypeEnum::MAJOR }}"
+                                        {{ old('responden_type') == FormRespondentTypeEnum::MAJOR->value ? 'selected' : '' }}>
+                                        Jurusan</option>
                                 @endnotrole
-                                <option value="{{ FormRespondentTypeEnum::STUDY_PROGRAM }}">Program Studi
+                                <option value="{{ FormRespondentTypeEnum::STUDY_PROGRAM }}"
+                                    {{ old('responden_type') == FormRespondentTypeEnum::STUDY_PROGRAM->value ? 'selected' : '' }}>
+                                    Program Studi
                                 </option>
-                                <option value="{{ FormRespondentTypeEnum::STUDENT }}">Spesifik Mahasiswa</option>
-                                <option value="{{ FormRespondentTypeEnum::LECTURER }}">Spesifik Dosen</option>
-                                <option value="{{ FormRespondentTypeEnum::EDUCATIONAL_STAFF }}">Spesifik Tenaga
-                                    Pendidik</option>
+                                <option value="{{ FormRespondentTypeEnum::STUDENT }}"
+                                    {{ old('responden_type') == FormRespondentTypeEnum::STUDENT->value ? 'selected' : '' }}>
+                                    Spesifik Mahasiswa</option>
+                                <option value="{{ FormRespondentTypeEnum::LECTURER }}"
+                                    {{ old('responden_type') == FormRespondentTypeEnum::LECTURER->value ? 'selected' : '' }}>
+                                    Spesifik Dosen</option>
+                                <option value="{{ FormRespondentTypeEnum::EDUCATIONAL_STAFF }}"
+                                    {{ old('responden_type') == FormRespondentTypeEnum::EDUCATIONAL_STAFF->value ? 'selected' : '' }}>
+                                    Spesifik Tenaga Pendidik</option>
                             </select>
                             <label for="responden_type">Responden</label>
                             @error('responden_type')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                            @error('respondent_ids')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>

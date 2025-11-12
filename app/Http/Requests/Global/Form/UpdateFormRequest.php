@@ -30,6 +30,12 @@ class UpdateFormRequest extends FormRequest
    */
   public function rules(): array
   {
+    $SPECIFIC_TYPES = [
+      FormRespondentTypeEnum::STUDENT->value,
+      FormRespondentTypeEnum::LECTURER->value,
+      FormRespondentTypeEnum::EDUCATIONAL_STAFF->value, // atau TENDIK
+    ];
+
     return [
       'code'        => ['required', Rule::unique('m_form', 'code')->ignore($this->route('id'))],
       'type'        => ['required', Rule::in(FormTypeEnum::toArray())],
@@ -42,16 +48,25 @@ class UpdateFormRequest extends FormRequest
       'major_id' => [
         'nullable',
         'string',
-        'uuid'
+        'uuid',
+        Rule::requiredIf(fn() => $this->responden_type === FormRespondentTypeEnum::MAJOR->value
+          || $this->responden_type === FormRespondentTypeEnum::STUDY_PROGRAM->value),
       ],
       'study_program_id' => [
         'nullable',
         'string',
-        'uuid'
+        'uuid',
+        Rule::requiredIf(fn() => $this->responden_type === FormRespondentTypeEnum::STUDY_PROGRAM->value),
       ],
       'respondent_ids' => [
         'nullable',
-        'array'
+        'array',
+        Rule::requiredIf(
+          fn() =>
+          in_array($this->responden_type, $SPECIFIC_TYPES, true)
+            && blank($this->major_id)
+            && blank($this->study_program_id)
+        ),
       ],
       'respondent_ids.*' => [
         'string',
@@ -86,6 +101,9 @@ class UpdateFormRequest extends FormRequest
       'respondent_ids.array'      => 'Daftar responden tidak valid.',
       'respondent_ids.*.string'   => 'Responden tidak valid.',
       'respondent_ids.*.uuid'     => 'Responden tidak valid.',
+      'major_id.required'          => 'Jurusan wajib diisi untuk tipe responden ini.',
+      'study_program_id.required'  => 'Program studi wajib diisi untuk tipe responden ini.',
+      'respondent_ids.required'    => 'Pilih minimal satu responden / isi filter jurusan/prodi.',
     ];
   }
 }

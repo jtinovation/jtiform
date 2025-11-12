@@ -132,7 +132,7 @@
                         @endphp
                         <div class="form-floating form-floating-outline">
                             <select name="responden_type" id="responden_type"
-                                class="form-select @error('responden_type') is-invalid @enderror">
+                                class="form-select @error('responden_type') is-invalid @enderror @error('respondent_ids') is-invalid @enderror">
                                 <option value="" disabled selected>-- Pilih Tipe Responden --</option>
                                 <option value="{{ FormRespondentTypeEnum::ALL }}"
                                     {{ old('responden_type', $respondenType) == FormRespondentTypeEnum::ALL->value ? 'selected' : '' }}>
@@ -155,6 +155,11 @@
                             </select>
                             <label for="responden_type">Responden</label>
                             @error('responden_type')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                            @error('respondent_ids')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>

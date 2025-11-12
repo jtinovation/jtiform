@@ -16,6 +16,7 @@ class FormSubmissionController extends Controller
     $user = Auth::user();
     $submission = Submission::where('m_user_id', $user->id)
       ->with('form')
+      ->where('id', $id)
       ->firstOrFail();
 
     $me = ApiHelper::getMe($user->token);

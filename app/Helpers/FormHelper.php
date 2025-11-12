@@ -282,6 +282,7 @@ class FormHelper
 
     $submissions = Submission::where('m_user_id', Auth::user()->id)
       ->with('form')
+      ->whereHas('form')
       ->when($search, function ($query, $search) {
         return $query->whereHas('form', function ($q) use ($search) {
           $q->where('title', 'like', "%{$search}%")
