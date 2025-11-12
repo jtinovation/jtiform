@@ -312,7 +312,12 @@ class HomeHelper
 
   public static function buildQuestionScoreStack(array $filter): array
   {
-    $formMeta = DB::table('m_form')->where('type', FormTypeEnum::LECTURE_EVALUATION->value)->latest()->first(['session_id', 'is_even', 'id']);
+    $formMeta = DB::table('m_form')
+      ->where('type', FormTypeEnum::LECTURE_EVALUATION->value)
+      ->when($filter['session_id'], fn($q) => $q->where('session_id', $filter['session_id']))
+      ->when($filter['is_even'], fn($q) => $q->where('is_even', $filter['is_even']))
+      ->latest()
+      ->first(['session_id', 'is_even', 'id']);
     // Ambil pertanyaan yang mau ditampilkan (urut sequence)
     $questions = DB::table('m_question')
       ->where('m_form_id', $formMeta->id)
