@@ -319,6 +319,11 @@ class HomeHelper
       // ->latest()
       ->first(['session_id', 'is_even', 'id']);
     // Ambil pertanyaan yang mau ditampilkan (urut sequence)
+
+    if (!$formMeta) {
+      return ['categories' => [], 'series' => []];
+    }
+
     $questions = DB::table('m_question')
       ->where('m_form_id', $formMeta->id)
       // jika hanya mau yg bertipe memilih skor:
